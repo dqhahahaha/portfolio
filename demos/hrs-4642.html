@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我方产品竞争格局盘</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#f5f7fa; --panel2:#e8ecf1; --line:#d5dae3;
+    --txt:#1a1a2e; --muted:#6b7280; --accent:#0033A0;
+    --t1:#e74c3c; --t2:#e67e22; --t3:#d4a017; --t4:#27ae60;
+    --new:#8e44ad; --ok:#27ae60;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.5;font-size:14px}
+  header{background:#0033A0;
+    padding:18px 28px;border-bottom:none}
+  header h1{font-size:20px;font-weight:600;color:#ffffff}
+  header .sub{color:#c0d0f0;font-size:13px;margin-top:4px}
+  header .meta{color:#a0b8e0;font-size:12px;margin-top:6px}
+  header a.back{color:#ffffff;font-size:12px;text-decoration:none;opacity:0.85}
+  .wrap{padding:20px 28px;max-width:1500px;margin:0 auto}
+  .controls{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 18px;margin-bottom:18px}
+  .controls .grp{display:flex;flex-direction:column;gap:4px}
+  .controls label{font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.04em}
+  select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+    border-radius:6px;padding:7px 10px;font-size:13px;min-width:180px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px}
+  .card .n{font-size:26px;font-weight:700;color:var(--accent)}
+  .card .l{color:var(--muted);font-size:12px;margin-top:3px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:16px;margin-bottom:18px}
+  .panel h2{font-size:15px;margin-bottom:12px;display:flex;align-items:center;
+    gap:8px;cursor:pointer}
+  .panel h2 .tag{font-size:11px;color:var(--muted);font-weight:400}
+  .panel h2 .chev{margin-left:auto;color:var(--muted);font-size:12px}
+  .collapsible.collapsed .body{display:none}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);
+    vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11px;
+    text-transform:uppercase;letter-spacing:.03em;cursor:pointer;
+    white-space:nowrap}
+  th:hover{color:var(--txt)}
+  tr.crow{cursor:pointer}
+  tr.crow:hover td{background:var(--panel2)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:11px;font-size:11px;
+    font-weight:600;color:#0f1419}
+  .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;
+    font-weight:600;margin-left:4px}
+  .b-new{background:var(--new);color:#0f1419}
+  .b-pub{background:var(--ok);color:#0f1419}
+  .b-fuzzy{background:#7a8699;color:#0f1419}
+  .b-cde{background:#e74c3c;color:#fff}
+  .muted{color:var(--muted)}
+  .small{font-size:11px}
+  .detail{background:#f0f2f5;border-radius:8px;padding:12px;margin:4px 0}
+  .detail table{font-size:12px}
+  a{color:var(--accent)}
+  .alert-list{display:flex;flex-direction:column;gap:6px}
+  .alert{padding:7px 10px;border-radius:7px;font-size:12px;
+    border-left:3px solid var(--line);background:var(--panel)}
+  .alert.add{border-left-color:var(--new);background:#f3eef8}
+  .alert.chg{border-left-color:var(--accent);background:#e8eef8}
+  .alert.early{border-left-color:var(--t2);background:#fef9ee}
+  .chartbox{position:relative;height:580px;min-height:580px;width:100%}
+  .chartbox canvas{width:100%!important;height:100%!important}
+  .chartbox.sm{height:280px;min-height:280px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .disclaim{font-size:11px;color:var(--muted);background:#fef3cd;
+    border:1px solid #f0d86e;border-radius:6px;padding:8px 10px;margin-bottom:10px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);
+    margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:4px}
+  .dot{width:10px;height:10px;border-radius:50%}
+
+  /* Legend panel inner styles */
+  .legend-panel h3{font-size:13px;font-weight:600;margin:16px 0 8px;color:var(--txt)}
+  .legend-panel h3:first-child{margin-top:0}
+  .legend-panel p,.legend-panel li{font-size:12px;color:var(--txt);line-height:1.7}
+  .legend-panel ul{padding-left:18px;margin:4px 0}
+  .legend-panel ul li{font-size:12px;color:var(--txt)}
+  .legend-panel table{font-size:12px;margin-bottom:4px}
+  .legend-panel table th{font-size:10px}
+  .legend-panel table td{padding:4px 8px}
+  .legend-panel .inline-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  .legend-panel .inline-pill{display:inline-block;padding:1px 6px;border-radius:9px;font-size:10px;font-weight:600;margin:0 2px}
+  .legend-panel .inline-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;margin:0 2px}
+  .legend-panel .fml{font-family:'SF Mono','Fira Code','Consolas',monospace;font-size:11px;background:var(--panel2);padding:2px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>我方产品竞争格局盘</h1>
+  <div class="sub">我方产品竞争格局盘 · 以我方产品为锚点的详细竞争格局</div>
+  <div class="meta">数据生成时间：2026-06-25T03:46:13+00:00　|　<a class="back" href="index.html">← 返回靶点视角盘 (index.html)</a></div>
+</header>
+<div class="wrap">
+  <div class="controls">
+    <div class="grp">
+      <label>我方产品</label>
+      <select id="selProduct" onchange="onProductChange()"></select>
+    </div>
+    <div class="grp">
+      <label>适应症</label>
+      <select id="selIndication" onchange="render()"></select>
+    </div>
+    <div class="grp">
+      <label>竞品排序</label>
+      <select id="selSort" onchange="render()">
+        <option value="threat">综合威胁分</option>
+        <option value="phase">研发进度</option>
+        <option value="readout">读出紧迫度</option>
+        <option value="efficacy">疗效(有数据优先)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="app"></div>
+</div>
+
+<!-- ===== 📖 图例与定义面板 ===== -->
+<div class="panel collapsible collapsed legend-panel" id="legendPanel">
+  <h2 onclick="toggle('legendPanel')">📖 图例与定义 <span class="chev">▾</span></h2>
+  <div class="body">
+
+    <!-- Phase 分级表 -->
+    <h3>Phase 分级表</h3>
+    <table>
+      <thead><tr><th>代码</th><th>中文</th><th>分数</th></tr></thead>
+      <tbody>
+        <tr><td><span class="fml">EARLY_PHASE1</span></td><td>早期I期</td><td>1</td></tr>
+        <tr><td><span class="fml">PHASE1</span></td><td>I期</td><td>2</td></tr>
+        <tr><td><span class="fml">PHASE1/PHASE2</span></td><td>I/II期</td><td>3</td></tr>
+        <tr><td><span class="fml">PHASE2</span></td><td>II期</td><td>4</td></tr>
+        <tr><td><span class="fml">PHASE2/PHASE3</span></td><td>II/III期</td><td>5</td></tr>
+        <tr><td><span class="fml">PHASE3</span></td><td>III期</td><td>7</td></tr>
+        <tr><td><span class="fml">PHASE4</span></td><td>IV期/上市后</td><td>8</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">分数越高 = 研发越成熟，对竞争格局的威胁越大。同一竞品取所有临床试验的最高阶段分数。</p>
+
+    <!-- Tier 威胁分级 -->
+    <h3>Tier 威胁分级</h3>
+    <table>
+      <thead><tr><th>Tier</th><th>分数</th><th>色标</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td>Tier 1</td><td>≥ 7.0</td><td><span class="inline-dot" style="background:#e74c3c"></span>红</td><td>高威胁</td></tr>
+        <tr><td>Tier 2</td><td>≥ 4.5</td><td><span class="inline-dot" style="background:#e67e22"></span>橙</td><td>中高威胁</td></tr>
+        <tr><td>Tier 3</td><td>≥ 2.5</td><td><span class="inline-dot" style="background:#f1c40f"></span>黄</td><td>中威胁</td></tr>
+        <tr><td>Tier 4</td><td>&lt; 2.5</td><td><span class="inline-dot" style="background:#2ecc71"></span>绿</td><td>低威胁</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 威胁分计算公式 -->
+    <h3>威胁分计算公式</h3>
+    <p><strong>威胁分</strong> = <span class="fml">Phase_Score</span> × <span class="fml">Status_Weight</span>，结果上限 10.0。</p>
+    <p class="small muted">Phase_Score 见上表。Status_Weight 对应临床试验当前状态的成熟度权重：</p>
+    <table>
+      <thead><tr><th>临床试验状态</th><th>权重</th></tr></thead>
+      <tbody>
+        <tr><td><span class="fml">RECRUITING</span></td><td>1.0</td></tr>
+        <tr><td><span class="fml">ACTIVE_NOT_RECRUITING</span></td><td>1.2</td></tr>
+        <tr><td><span class="fml">COMPLETED</span></td><td>1.3</td></tr>
+        <tr><td><span class="fml">ENROLLING_BY_INVITATION</span></td><td>0.9</td></tr>
+        <tr><td><span class="fml">NOT_YET_RECRUITING</span></td><td>0.6</td></tr>
+        <tr><td><span class="fml">UNKNOWN</span></td><td>0.5</td></tr>
+        <tr><td><span class="fml">SUSPENDED</span></td><td>0.3</td></tr>
+        <tr><td><span class="fml">TERMINATED</span></td><td>0.2</td></tr>
+        <tr><td><span class="fml">WITHDRAWN</span></td><td>0.1</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">例：III期（7分）× COMPLETED（1.3）= 9.1 → 高威胁 Tier1（红）。</p>
+
+    <!-- 四象限定义 -->
+    <h3>四象限定义</h3>
+    <p>X轴 = <strong>研发进度</strong>（Phase_Score，0~8），Y轴 = <strong>综合威胁/疗效强度</strong>（0~10），中点 X=4, Y=4.5。</p>
+    <ul>
+      <li><strong>右上（领先威胁）</strong> — 高进度 + 高威胁：核心对手，已进入后期且威胁明确。</li>
+      <li><strong>左上（高潜早期）</strong> — 低进度 + 高威胁：疗效信号强但尚处早期，需动态跟踪。</li>
+      <li><strong>右下（后期平庸）</strong> — 高进度 + 低威胁：后期试验但威胁一般，可能是非头对头。</li>
+      <li><strong>左下（早期观察）</strong> — 低进度 + 低威胁：早期或暂无明确疗效信号，持续监控。</li>
+    </ul>
+    <p class="small muted">★ 标记 = 我方产品在 X 轴按我方自身阶段定位，Y 轴固定于 9.2 以示区分。</p>
+
+    <!-- 读出时间 -->
+    <h3>读出时间</h3>
+    <p>读出时间的推算逻辑：</p>
+    <ul>
+      <li><strong>估算</strong> — 根据 PCD（Primary Completion Date）+ 5 个月分析与锁库期反推。当读到具体发表日期时则自动替换。</li>
+      <li><strong>实证</strong> — 已在 PubMed 检索到对应 NCT 编号的正式出版物。</li>
+      <li><strong>疑似已发表(待确认)</strong> — 检索到疑似匹配的出版物，NCT 编号未能直接对应，需人工确认。</li>
+    </ul>
+
+    <!-- 间接比较标注 -->
+    <h3>⚠️ 间接比较标注</h3>
+    <p>跨试验疗效数据并列展示处有 <span class="inline-badge b-fuzzy" style="font-size:10px;padding:1px 6px">间接</span> 标志。不同试验的入组人群、研究设计、数据成熟度各不相同，<strong>不可直接下结论</strong>。具体差异可通过悬停「人群备注」查看。</p>
+
+    <!-- 数据源与标记 -->
+    <h3>数据源与标记</h3>
+    <table>
+      <thead><tr><th>标记</th><th>含义</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill" style="background:#8e44ad;font-size:10px;padding:1px 6px">🆕新发现</span></td><td>CT.gov 自动发现、不在盯防名单内的新竞品</td><td>ClinicalTrials.gov 自动抓取</td></tr>
+        <tr><td><span class="pill" style="background:#27ae60;font-size:10px;padding:1px 6px">📄已发表</span></td><td>有 PubMed 正式出版物对应</td><td>PubMed 自动交叉检索</td></tr>
+        <tr><td><span class="badge b-fuzzy" style="font-size:10px;padding:1px 6px">⚠️间接</span></td><td>跨试验疗效间接比较，不可直接下结论</td><td>证据地图管线 / Excel③</td></tr>
+        <tr><td><span class="badge" style="background:#7a8699;color:#fff;font-size:10px;padding:1px 6px">📌盯防名单</span></td><td>该竞品在手动盯防名单中（Excel②录入）</td><td>手动录入（Excel②）</td></tr>
+        <tr><td>★</td><td>我方产品（四象限图中标记）</td><td>我方产品线（Excel①）</td></tr>
+      </tbody>
+    </table>
+
+    <!-- CDE阶段说明 -->
+    <h3>CDE 阶段说明</h3>
+    <table>
+      <thead><tr><th>标记</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge b-cde">NDA受理</span></td><td>新药上市申请已获 CDE 受理，处于审评中</td></tr>
+        <tr><td><span class="badge b-cde">已获批</span></td><td>已获 NMPA 批准上市</td></tr>
+        <tr><td><span class="badge b-cde">III期临床</span></td><td>正在进行 III 期确证性临床试验</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">CDE/NMPA 数据来自手动录入（Excel④），非自动抓取。</p>
+
+    <!-- 疗效终点缩写 -->
+    <h3>疗效终点缩写对照</h3>
+    <table>
+      <thead><tr><th>缩写</th><th>全称</th><th>中文</th></tr></thead>
+      <tbody>
+        <tr><td>ORR</td><td>Objective Response Rate</td><td>客观缓解率</td></tr>
+        <tr><td>mPFS</td><td>Median Progression-Free Survival</td><td>中位无进展生存期</td></tr>
+        <tr><td>mOS</td><td>Median Overall Survival</td><td>中位总生存期</td></tr>
+        <tr><td>HR</td><td>Hazard Ratio</td><td>风险比</td></tr>
+        <tr><td>CI</td><td>Confidence Interval</td><td>置信区间</td></tr>
+        <tr><td>DCR</td><td>Disease Control Rate</td><td>疾病控制率</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+const MODEL = {"generated_at": "2026-06-25T03:46:13+00:00", "products": [{"our_product": "HRS-4642 (KRAS G12D Inhibitor)", "indications": [{"our_product": "HRS-4642 (KRAS G12D Inhibitor)", "indication": "1L 胰腺癌", "our_phase": "PHASE3", "line": "1L", "mechanism": "KRAS G12D", "competitors": [{"key": "RMC-6236 (Daraxonrasib)", "competitor": "RMC-6236 (Daraxonrasib)", "company": "Revolution Medicines", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06625320", "title": "Phase 3 Study of Daraxonrasib (RMC-6236) in Patients With Previously Treated Metastatic Pancreatic Ductal Adenocarcinoma (PDAC)", "status": "ACTIVE_NOT_RECRUITING", "phase": "PHASE3", "primary_completion_date": "2026-06", "start_date": "2024-10-16", "completion_date": "2027-12", "conditions": ["Pancreatic Cancer", "PDAC", "PDAC - Pancreatic Ductal Adenocarcinoma"], "interventions": ["RMC-6236", "Gemcitabine", "nab-paclitaxel", "Irinotecan", "Liposomal irinotecan", "5-fluorouracil", "leucovorin", "Oxaliplatin"], "lead_sponsor": "Revolution Medicines, Inc.", "collaborators": [], "enrollment": 500, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06625320", "fetched_at": "2026-06-25T03:02:57+00:00", "estimated_readout": "2026-11-01", "months_from_now": 5, "imminent": true, "readout_note": "未来 5 个月内读出 (重点监测)", "threat_score": 8.4, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 6.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07252232", "title": "Study of Daraxonrasib (RMC-6236) in Patients With Resected Pancreatic Ductal Adenocarcinoma (PDAC)", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2029-05-10", "start_date": "2025-12-15", "completion_date": "2030-07-10", "conditions": ["Pancreatic Cancer", "PDAC", "PDAC - Pancreatic Ductal Adenocarcinoma", "Resectable Pancreatic Ductal Adenocarcinoma (PDAC)", "Resected Pancreatic Adenocarcinoma"], "interventions": ["daraxonrasib"], "lead_sponsor": "Revolution Medicines, Inc.", "collaborators": [], "enrollment": 500, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07252232", "fetched_at": "2026-06-25T03:02:57+00:00", "estimated_readout": "2029-10-01", "months_from_now": 40, "imminent": false, "readout_note": "约 40 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07491445", "title": "Study of Daraxonrasib and Daraxonrasib + GnP as First-line Treatment in Patients With Metastatic Pancreatic Adenocarcinoma", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2028-06", "start_date": "2026-03-09", "completion_date": "2029-03", "conditions": ["Pancreatic Cancer", "Pancreatic Cancer Metastatic", "PDAC", "PDAC - Pancreatic Ductal Adenocarcinoma", "Pancreatic Ductal Adenocarcinoma (PDAC)", "Pancreatic Adenocarcinoma Metastatic", "Pancreatic Adenocarcinoma", "Pancreatic Adenosquamous Carcinoma"], "interventions": ["daraxonrasib", "gemcitabine", "nab-paclitaxel"], "lead_sponsor": "Revolution Medicines, Inc.", "collaborators": [], "enrollment": 900, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07491445", "fetched_at": "2026-06-25T03:02:57+00:00", "estimated_readout": "2028-11-01", "months_from_now": 29, "imminent": false, "readout_note": "约 29 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07573215", "title": "Expanded Access Program for Daraxonrasib (RMC-6236) in Previously Treated Metastatic Pancreatic Adenocarcinoma", "status": "AVAILABLE", "phase": "NA", "primary_completion_date": null, "start_date": null, "completion_date": null, "conditions": ["PDAC", "PDAC - Pancreatic Ductal Adenocarcinoma", "Metastatic Pancreas Adenocarcinoma", "Pancreatic Cancer", "Pancreatic Cancer Metastatic", "Pancreatic Adenocarcinoma Metastatic", "Pancreatic Adenocarcinoma", "Pancreatic Adenosquamous Carcinoma"], "interventions": ["daraxonrasib"], "lead_sponsor": "Revolution Medicines, Inc.", "collaborators": [], "enrollment": null, "study_type": "EXPANDED_ACCESS", "url": "https://clinicaltrials.gov/study/NCT07573215", "fetched_at": "2026-06-25T03:02:57+00:00", "estimated_readout": null, "months_from_now": null, "imminent": false, "readout_note": "无 PCD，无法反推", "threat_score": 0.0, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 0, "matrix_y": 2.5, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["NA", "PHASE3"], "max_threat": 8.4, "in_watchlist": true, "new_entrant": false, "watch_priority": "medium", "note": "pan-RAS(ON) 多选择性抑制剂；Cancer Discov 2024 临床前；Phase 1/2", "trial_count": 4, "evidence": [{"competitor": "Daraxonrasib (RMC-6236)", "indication": "1L 胰腺癌", "endpoint": "mOS (ITT)", "value": "13.2", "unit": "months", "ci_95": "", "comparator": "化疗", "n": "327", "readout_date": "2026-06", "source": "ASCO 2026 Plenary RASolute 302 PMID 42226659", "population_note": "2L mPDAC; daraxonrasib vs chemo HR 0.40"}, {"competitor": "Daraxonrasib (RMC-6236)", "indication": "1L 胰腺癌", "endpoint": "ORR", "value": "36.0", "unit": "percent", "ci_95": "", "comparator": "化疗", "n": "327", "readout_date": "2026-06", "source": "ASCO 2026 Plenary RASolute 302 PMID 42226659", "population_note": "mid-to-upper 30s range"}], "key_efficacy": {"text": "ORR=36.0percent vs 化疗", "source": "ASCO 2026 Plenary RASolute 302 PMID 42226659", "population_note": "mid-to-upper 30s range", "readout_date": "2026-06", "pmid": "42226659"}, "cde": [], "nct_pubmed_status": {"NCT06625320": {"published": false, "match_type": "none", "pmids": []}, "NCT07252232": {"published": false, "match_type": "none", "pmids": []}, "NCT07491445": {"published": false, "match_type": "none", "pmids": []}, "NCT07573215": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 8.4, "quadrant": "领先威胁", "next_readout": "2026-11-01", "published_any": false, "pubmed_links": []}, {"key": "Zoldonrasib (RMC-9805)", "competitor": "Zoldonrasib (RMC-9805)", "company": "Revolution Medicines", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07621718", "title": "Study of Zoldonrasib + Chemo of Investigator's Choice vs Placebo + Chemo of Investigator's Choice as First-line Treatment in Metastatic KRAS G12D-mutated Pancreatic Adenocarcinoma ( RASolute 305 )", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2028-12-30", "start_date": "2026-05-22", "completion_date": "2030-04-22", "conditions": ["Pancreatic Cancer", "Pancreatic Cancer Metastatic", "PDAC", "PDAC - Pancreatic Ductal Adenocarcinoma", "Pancreatic Ductal Adenocarcinoma (PDAC)", "Pancreatic Adenocarcinoma Metastatic", "Pancreatic Adenocarcinoma", "Pancreatic Adenosquamous Carcinoma"], "interventions": ["Zoldonrasib", "Placebo", "Oxaliplatin", "Leucovorin (Calcium Folinate)", "5-Fluorouracil", "Irinotecan", "Gemcitabine (GEM)", "Nab-paclitaxel"], "lead_sponsor": "Revolution Medicines, Inc.", "collaborators": [], "enrollment": 670, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07621718", "fetched_at": "2026-06-25T03:02:49+00:00", "estimated_readout": "2029-05-01", "months_from_now": 35, "imminent": false, "readout_note": "约 35 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "RASolute 305 Phase 3 NCT07621718（vs 化疗）", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07621718": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2029-05-01", "published_any": false, "pubmed_links": []}, {"key": "Setidegrasib (ASP3082)", "competitor": "Setidegrasib (ASP3082)", "company": "Astellas Pharma", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07409272", "title": "A Study to Evaluate the Effectiveness and Safety of Setidegrasib, Given With Either mFOLFIRINOX or NALIRIFOX Chemotherapies, in People With Pancreatic Cancer", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2029-08-31", "start_date": "2026-02-17", "completion_date": "2029-08-31", "conditions": ["Pancreatic Cancer", "Metastatic Pancreatic Cancer", "Metastatic Pancreatic Adenocarcinoma"], "interventions": ["Setidegrasib", "Oxaliplatin", "Leucovorin", "Irinotecan", "fluorouracil", "liposomal irinotecan", "Placebo"], "lead_sponsor": "Astellas Pharma Global Development, Inc.", "collaborators": [], "enrollment": 614, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07409272", "fetched_at": "2026-06-25T03:02:52+00:00", "estimated_readout": "2030-01-01", "months_from_now": 43, "imminent": false, "readout_note": "约 43 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "Phase 1 PDAC 2L+ ORR 24%、mPFS 3.0mo、mOS 10.3mo", "trial_count": 1, "evidence": [{"competitor": "Setidegrasib (ASP3082)", "indication": "KRAS G12D 胰腺癌 2L+", "endpoint": "ORR", "value": "24", "unit": "percent", "ci_95": "8-47", "comparator": "", "n": "21", "readout_date": "2026-03", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; mPDAC 2L/3L (67% 3L)"}, {"competitor": "Setidegrasib (ASP3082)", "indication": "KRAS G12D 胰腺癌 2L+", "endpoint": "mPFS", "value": "3.0", "unit": "months", "ci_95": "1.4-6.9", "comparator": "", "n": "21", "readout_date": "2026-03", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; mPDAC 2L/3L"}, {"competitor": "Setidegrasib (ASP3082)", "indication": "KRAS G12D 胰腺癌 2L+", "endpoint": "mOS", "value": "10.3", "unit": "months", "ci_95": "4.2-13.0", "comparator": "", "n": "21", "readout_date": "2026-03", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; mPDAC 2L/3L"}], "key_efficacy": {"text": "mPFS=3.0months", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; mPDAC 2L/3L", "readout_date": "2026-03", "pmid": "41879829"}, "cde": [], "nct_pubmed_status": {"NCT07409272": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2030-01-01", "published_any": false, "pubmed_links": []}, {"key": "INCB161734", "competitor": "INCB161734", "company": "Incyte Corporation", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07522073", "title": "A Study to Evaluate Chemotherapy With or Without INCB161734 in Previously Untreated, KRAS G12D-Mutated Metastatic Pancreatic Ductal Adenocarcinoma", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2028-09-15", "start_date": "2026-04-09", "completion_date": "2029-03-19", "conditions": ["Solid Tumors"], "interventions": ["INCB161734", "Placebo", "Investigator's choice of chemotherapy"], "lead_sponsor": "Incyte Corporation", "collaborators": [], "enrollment": 588, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07522073", "fetched_at": "2026-06-25T03:02:55+00:00", "estimated_readout": "2029-02-01", "months_from_now": 32, "imminent": false, "readout_note": "约 32 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "G12D 抑制剂 + 化疗；Phase 3 1L PDAC NCT07522073", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07522073": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2029-02-01", "published_any": false, "pubmed_links": []}, {"key": "HRS-4642 (KRAS G12D Inhibitor)", "competitor": "HRS-4642 (KRAS G12D Inhibitor)", "company": "恒瑞医药 Hengrui", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07232875", "title": "HRS 4642 Injection Combined With AG Versus Placebo Combined With AG Therapy in First-Line Advanced or Metastatic Pancreatic Cancer", "status": "NOT_YET_RECRUITING", "phase": "PHASE3", "primary_completion_date": "2029-04", "start_date": "2025-12", "completion_date": "2029-04", "conditions": ["KRAS G12D-Mutant Advanced or Metastatic Pancreatic Cancer in the First-line Setting"], "interventions": ["HRS-4642 + AG", "HRS-4642 placebo + AG"], "lead_sponsor": "Jiangsu HengRui Medicine Co., Ltd.", "collaborators": [], "enrollment": 588, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07232875", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2029-09-01", "months_from_now": 39, "imminent": false, "readout_note": "约 39 个月后读出", "threat_score": 4.2, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 7, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06770452", "title": "HRS-4642 With Nimotuzumab and Chemotherapy for First-line Treatment of Advanced Pancreatic Cancer Patients", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-02-01", "start_date": "2025-03-25", "completion_date": "2028-02-01", "conditions": ["Metastatic Pancreatic Carcinoma"], "interventions": ["HRS-4642", "Nimotuzumab", "gemcitabine + nab-paclitaxel"], "lead_sponsor": "Zhejiang University", "collaborators": [], "enrollment": 133, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06770452", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-07-01", "months_from_now": 13, "imminent": false, "readout_note": "约 13 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07240766", "title": "HRS-4642 in Combination With Nimotuzumab and Chemotherapy for BRPC With KRAS G12D Mutation", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-05-15", "start_date": "2026-02-15", "completion_date": "2028-11-15", "conditions": ["Borderline Resectable Pancreatic Adenocarcinoma"], "interventions": ["HRS-4642+AG+Nimotuzumab"], "lead_sponsor": "Zhejiang University", "collaborators": [], "enrollment": 40, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07240766", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-10-01", "months_from_now": 16, "imminent": false, "readout_note": "约 16 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06587061", "title": "HRS-4642 in Combination With AG for Neoadjuvant and Adjuvant Treatment of Pancreatic Cancer", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-06", "start_date": "2024-12-03", "completion_date": "2027-12", "conditions": ["Pancreatic Cancer"], "interventions": ["HRS-4642+AG"], "lead_sponsor": "Ruijin Hospital", "collaborators": [], "enrollment": 30, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06587061", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-11-01", "months_from_now": 17, "imminent": false, "readout_note": "约 17 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07438106", "title": "A Phase II Study of HRS-4642 Combined With AG (Nab-paclitaxel and Gemcitabine) as Conversion Therapy for Locally Advanced Pancreatic Cancer", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-10", "start_date": "2026-01-28", "completion_date": "2027-12", "conditions": ["Locally Advanced Pancreatic Cancer With KRAS G12D Mutation"], "interventions": ["HRS-4642 Injection"], "lead_sponsor": "The First Affiliated Hospital with Nanjing Medical University", "collaborators": [], "enrollment": 30, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07438106", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2028-03-01", "months_from_now": 21, "imminent": false, "readout_note": "约 21 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06547736", "title": "Exploratory Platform Research on Precision Therapy of Advanced Pancreatic Cancer", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-03", "start_date": "2024-10-14", "completion_date": "2027-06", "conditions": ["Pancreatic Cancer"], "interventions": ["SHR-A2102 or/and HRS-4642", "SHR-A1904 or/and HRS-4642", "SHR-A1811 or/and HRS-4642", "SHR-A2102, HRS4642 and Adebrelimab"], "lead_sponsor": "Fudan University", "collaborators": [], "enrollment": 160, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06547736", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-08-01", "months_from_now": 14, "imminent": false, "readout_note": "约 14 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06773130", "title": "HRS-4642 Combined With Nimotuzumab in the Treatment of Recurrent or Metastatic Pancreatic Ductal Adenocarcinoma", "status": "ACTIVE_NOT_RECRUITING", "phase": "PHASE1/PHASE2", "primary_completion_date": "2026-08", "start_date": "2025-02-10", "completion_date": "2027-03", "conditions": ["Pancreatic Ductal Adenocarcinoma (PDAC)"], "interventions": ["HRS-4642", "Nimotuzumab"], "lead_sponsor": "West China Hospital", "collaborators": [], "enrollment": 20, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06773130", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-01-01", "months_from_now": 7, "imminent": true, "readout_note": "未来 7 个月内读出 (重点监测)", "threat_score": 3.6, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 3, "matrix_y": 6.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06427239", "title": "Exploratory Clinical Study of HRS-4642 Combined With Adebrelimab in the Treatment of Advanced Pancreatic Ductal Adenocarcinoma", "status": "RECRUITING", "phase": "PHASE1/PHASE2", "primary_completion_date": "2027-06", "start_date": "2024-06-17", "completion_date": "2028-03", "conditions": ["Pancreatic Cancer"], "interventions": ["HRS-4642", "Adebrelimab", "SHR-8068", "Faminitib or bevacizumab"], "lead_sponsor": "Fudan University", "collaborators": [], "enrollment": 130, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06427239", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-11-01", "months_from_now": 17, "imminent": false, "readout_note": "约 17 个月后读出", "threat_score": 3.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 3, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06938282", "title": "An Exploratory Clinical Study of HRS-4642 in Combination With Immunotherapy and Chemotherapy for Pancreatic Cancer", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-04-30", "start_date": "2025-05-01", "completion_date": "2029-04-30", "conditions": ["Pancreatic Cancer"], "interventions": ["HRS-4642"], "lead_sponsor": "Shanghai Zhongshan Hospital", "collaborators": [], "enrollment": 60, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06938282", "fetched_at": "2026-06-25T03:02:46+00:00", "estimated_readout": "2027-09-01", "months_from_now": 15, "imminent": false, "readout_note": "约 15 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE1/PHASE2", "PHASE2", "PHASE3"], "max_threat": 4.2, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "Phase 2 Nimotuzumab+化疗联合 NCT06770452", "trial_count": 9, "evidence": [{"competitor": "HRS-4642", "indication": "KRAS G12D 胰腺癌", "endpoint": "Phase Ib/II 研究中", "value": "", "unit": "", "ci_95": "", "comparator": "N/A", "n": "2025-07", "readout_date": "Front Pharmacol 16:1562481 PMID 40689200", "source": "HRS-4642+Nimotuzumab 联合方案研究方案；NCT06773130", "population_note": ""}], "key_efficacy": {"text": "Phase Ib/II 研究中= vs N/A", "source": "HRS-4642+Nimotuzumab 联合方案研究方案；NCT06773130", "population_note": "", "readout_date": "Front Pharmacol 16:1562481 PMID 40689200", "pmid": null}, "cde": [], "nct_pubmed_status": {"NCT07232875": {"published": false, "match_type": "none", "pmids": []}, "NCT06770452": {"published": false, "match_type": "none", "pmids": []}, "NCT07240766": {"published": false, "match_type": "none", "pmids": []}, "NCT06587061": {"published": false, "match_type": "none", "pmids": []}, "NCT07438106": {"published": false, "match_type": "none", "pmids": []}, "NCT06547736": {"published": false, "match_type": "none", "pmids": []}, "NCT06773130": {"published": false, "match_type": "none", "pmids": []}, "NCT06427239": {"published": false, "match_type": "none", "pmids": []}, "NCT06938282": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 4.2, "quadrant": "后期平庸", "next_readout": "2027-01-01", "published_any": false, "pubmed_links": []}, {"key": "BBO-11818", "competitor": "BBO-11818", "company": "BridgeBio Oncology Therapeutics", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "medium", "note": "pan-KRAS 抑制剂；Phase 1 NCT06917079", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 6, "new_entrants": 0, "watchlist": 6, "published": 0}}, {"our_product": "HRS-4642 (KRAS G12D Inhibitor)", "indication": "2L+ NSCLC", "our_phase": "PHASE1/PHASE2", "line": "2L+", "mechanism": "KRAS G12D", "competitors": [{"key": "Setidegrasib (ASP3082)", "competitor": "Setidegrasib (ASP3082)", "company": "Astellas Pharma", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07566052", "title": "A Study to Compare Setidegrasib (ASP3082) With Docetaxel, in People With Non-small Cell Lung Cancer With a KRAS G12D Mutation", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2030-06-30", "start_date": "2026-04-28", "completion_date": "2030-06-30", "conditions": ["Non-small Cell Lung Cancer (NSCLC)"], "interventions": ["Setidegrasib", "Docetaxel"], "lead_sponsor": "Astellas Pharma Global Development, Inc.", "collaborators": [], "enrollment": 356, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07566052", "fetched_at": "2026-06-25T03:02:52+00:00", "estimated_readout": "2030-11-01", "months_from_now": 53, "imminent": false, "readout_note": "约 53 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "G12D 靶向蛋白降解剂（PROTAC）；Phase 3 vs Docetaxel NCT07566052；NEJM 2026 发表 Phase 1", "trial_count": 1, "evidence": [{"competitor": "Setidegrasib (ASP3082)", "indication": "KRAS G12D NSCLC", "endpoint": "ORR", "value": "36", "unit": "percent", "ci_95": "22-51", "comparator": "", "n": "45", "readout_date": "2026-03", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; prior treated advanced KRAS G12D NSCLC"}, {"competitor": "Setidegrasib (ASP3082)", "indication": "KRAS G12D NSCLC", "endpoint": "mPFS", "value": "8.3", "unit": "months", "ci_95": "4.1-NE", "comparator": "", "n": "45", "readout_date": "2026-03", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; prior treated advanced KRAS G12D NSCLC"}, {"competitor": "Setidegrasib (ASP3082)", "indication": "KRAS G12D NSCLC", "endpoint": "12m OS率", "value": "59", "unit": "percent", "ci_95": "40-74", "comparator": "", "n": "45", "readout_date": "2026-03", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; estimated 12-month OS"}], "key_efficacy": {"text": "mPFS=8.3months", "source": "NEJM 394(14):1409-1420 PMID 41879829", "population_note": "Phase 1 600mg dose; prior treated advanced KRAS G12D NSCLC", "readout_date": "2026-03", "pmid": "41879829"}, "cde": [], "nct_pubmed_status": {"NCT07566052": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2030-11-01", "published_any": false, "pubmed_links": []}, {"key": "HRS-4642 (KRAS G12D Inhibitor)", "competitor": "HRS-4642", "company": "恒瑞医药 Hengrui", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "恒瑞自研 G12D 选择性抑制剂；全球首个进入 Phase 2/3 的 KRAS G12D 抑制剂；2024 Cancer Cell 发表 Phase 1 数据", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}, {"key": "Zoldonrasib (RMC-9805)", "competitor": "Zoldonrasib (RMC-9805)", "company": "Revolution Medicines", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "G12D 选择性共价抑制剂（CYPA 介导）；Science 2025；Phase 1 NSCLC ORR 52%", "trial_count": 0, "evidence": [{"competitor": "Zoldonrasib (RMC-9805)", "indication": "KRAS G12D NSCLC", "endpoint": "ORR", "value": "52", "unit": "percent", "ci_95": "", "comparator": "", "n": "N/A", "readout_date": "2026-05", "source": "Cancer Discov 16(6):OF1 PMID 42001453", "population_note": "Updated Phase I; DCR 93%"}, {"competitor": "Zoldonrasib (RMC-9805)", "indication": "KRAS G12D NSCLC", "endpoint": "mPFS", "value": "11.1", "unit": "months", "ci_95": "", "comparator": "", "n": "", "readout_date": "N/A", "source": "2026-05", "population_note": "Cancer Discov 16(6):OF1 PMID 42001453"}, {"competitor": "Zoldonrasib (RMC-9805)", "indication": "KRAS G12D NSCLC", "endpoint": "12m OS率", "value": "73", "unit": "percent", "ci_95": "", "comparator": "", "n": "", "readout_date": "N/A", "source": "2026-05", "population_note": "Cancer Discov 16(6):OF1 PMID 42001453"}, {"competitor": "Zoldonrasib (RMC-9805)", "indication": "KRAS G12D NSCLC", "endpoint": "DCR", "value": "93", "unit": "percent", "ci_95": "", "comparator": "", "n": "", "readout_date": "N/A", "source": "2026-05", "population_note": "Cancer Discov 16(6):OF1 PMID 42001453"}], "key_efficacy": {"text": "mPFS=11.1months", "source": "2026-05", "population_note": "Cancer Discov 16(6):OF1 PMID 42001453", "readout_date": "N/A", "pmid": "42001453"}, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 3, "new_entrants": 0, "watchlist": 3, "published": 0}}, {"our_product": "HRS-4642 (KRAS G12D Inhibitor)", "indication": "2L+ 结直肠癌", "our_phase": "PHASE1/PHASE2", "line": "2L+", "mechanism": "KRAS G12D", "competitors": [{"key": "HRS-4642 (KRAS G12D Inhibitor)", "competitor": "HRS-4642", "company": "恒瑞医药 Hengrui", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "恒瑞自研 G12D 选择性抑制剂；全球首个进入 Phase 2/3 的 KRAS G12D 抑制剂；2024 Cancer Cell 发表 Phase 1 数据", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 1, "new_entrants": 0, "watchlist": 1, "published": 0}}]}], "total_trials": 17, "total_evidence": 18};
+</script>
+<script>
+// Product-centric competitive landscape — interactions.
+// Selectors (product -> indication) + sort, change-alert area,
+// four-quadrant landscape chart, trend charts, detailed competitor table
+// with in-row trial drill-down.
+
+let _charts = [];
+function destroyCharts(){ _charts.forEach(c=>{try{c.destroy()}catch(e){}}); _charts=[]; }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,
+  c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function currentProduct(){ return document.getElementById('selProduct').value; }
+function currentIndication(){ return document.getElementById('selIndication').value; }
+
+function getView(){
+  const p = MODEL.products.find(x=>x.our_product===currentProduct());
+  if(!p) return null;
+  return p.indications.find(v=>v.indication===currentIndication()) || p.indications[0];
+}
+
+function initSelectors(){
+  const sp = document.getElementById('selProduct');
+  sp.innerHTML = MODEL.products.map(p=>
+    `<option value="${esc(p.our_product)}">${esc(p.our_product)}</option>`).join('');
+  populateIndications();
+}
+function populateIndications(){
+  const p = MODEL.products.find(x=>x.our_product===currentProduct());
+  const si = document.getElementById('selIndication');
+  si.innerHTML = (p?p.indications:[]).map(v=>
+    `<option value="${esc(v.indication)}">${esc(v.indication)}</option>`).join('');
+}
+function onProductChange(){ populateIndications(); render(); }
+
+// ---- sorting ----
+const PHASE_RANK={EARLY_PHASE1:1,PHASE1:2,'PHASE1/PHASE2':3,PHASE2:4,
+  'PHASE2/PHASE3':5,PHASE3:7,PHASE4:8};
+function topPhase(phases){if(!phases||!phases.length)return'—';return phases.reduce((a,b)=>(PHASE_RANK[a]||0)>(PHASE_RANK[b]||0)?a:b);}
+function phaseRank(phases){ return Math.max(0,...(phases||[]).map(p=>PHASE_RANK[p]||0)); }
+function sortComps(comps){
+  const mode=document.getElementById('selSort').value;
+  const ourProduct=currentProduct();
+  const a=[...comps];
+  a.sort((x,y)=>{
+    // ★我方产品始终排第一
+    const xOur=x.competitor&&x.competitor.includes(ourProduct);
+    const yOur=y.competitor&&y.competitor.includes(ourProduct);
+    if(xOur&&!yOur) return -1;
+    if(!xOur&&yOur) return 1;
+    if(mode==='threat') return y.quad_y-x.quad_y;
+    else if(mode==='phase') return phaseRank(y.phases)-phaseRank(x.phases);
+    else if(mode==='readout'){
+      const rx=x.next_readout||'9999', ry=y.next_readout||'9999';
+      return rx<ry?-1:rx>ry?1:0;}
+    else if(mode==='efficacy') return (y.key_efficacy?1:0)-(x.key_efficacy?1:0)||y.quad_y-x.quad_y;
+    return 0;
+  });
+  return a;
+}
+
+// ---- main render ----
+function render(){
+  destroyCharts();
+  const v=getView();
+  const app=document.getElementById('app');
+  if(!v){ app.innerHTML='<div class="panel">无数据</div>'; return; }
+  const c=v.counts;
+  app.innerHTML = `
+    ${overviewCards(v,c)}
+    ${changeAlertsHtml(v.change_alerts)}
+    <div class="panel collapsible" id="pq">
+      <h2 onclick="toggle('pq')">🎯 竞争格局四象限图
+        <span class="tag">X=研发进度 · Y=综合威胁/疗效 · 气泡=试验数 · ★=我方</span>
+        <span class="chev">▾</span></h2>
+      <div class="body">
+        <div class="chartbox"><canvas id="quadChart"></canvas></div>
+        <div class="legend" style="margin-top:8px;padding:8px 0">
+          <span><span class="dot" style="background:var(--t1)"></span>Tier1高威胁</span>
+          <span><span class="dot" style="background:var(--t2)"></span>Tier2中高</span>
+          <span><span class="dot" style="background:var(--t3)"></span>Tier3中</span>
+          <span><span class="dot" style="background:var(--t4)"></span>Tier4低</span>
+          <span><span class="dot" style="background:var(--new)"></span>🆕新发现</span>
+          <span style="margin-left:8px">| 象限虚线: X=4(中期) Y=威胁4.5 | ★ 五角星=我方产品</span>
+        </div>
+      </div>
+    </div>
+    ${trendsHtml(v.trends)}
+    <div class="panel">
+      <h2>📋 竞品详细格局表 <span class="tag">点击任一行展开该竞品的每个临床试验</span></h2>
+      <div class="disclaim">⚠️ 跨试验疗效为间接比较，人群/设计不同，不可直接下结论（悬停疗效看人群备注）。
+        疗效空缺分三级标注：有试验无数据→📝数据待发表 / 无试验→— / 其余→🔍待检索。依赖证据地图管线/手录(Excel③)。</div>
+      <div id="tableWrap"></div>
+    </div>
+  `;
+  drawQuadrant(v);
+  drawTrends(v.trends);
+  drawTable(v);
+}
+
+function overviewCards(v,c){
+  return `<div class="cards">
+    <div class="card"><div class="n">${esc(v.our_product)}</div>
+      <div class="l">我方产品 · ${esc(v.line||'')} · ${esc(v.our_phase||'')}</div></div>
+    <div class="card"><div class="n">${c.competitors}</div><div class="l">竞品总数</div></div>
+    <div class="card"><div class="n" style="color:var(--new)">${c.new_entrants}</div>
+      <div class="l">🆕 名单外新发现</div></div>
+    <div class="card"><div class="n">${c.watchlist}</div><div class="l">📌 盯防名单内</div></div>
+    <div class="card"><div class="n" style="color:var(--ok)">${c.published}</div>
+      <div class="l">已发表(数据落地)</div></div>
+  </div>`;
+}
+
+function changeAlertsHtml(ca){
+  if(!ca || !ca.has_baseline){
+    return `<div class="panel"><h2 style="cursor:default">🔔 变更告警</h2>
+      <div class="muted small">基线已建立——下次刷新起将显示"相比上次的变化"。</div></div>`;
+  }
+  const rows=[];
+  (ca.added||[]).forEach(a=>rows.push(`<div class="alert add">🆕 ${esc(a.competitor)}：${esc(a.detail)}</div>`));
+  (ca.changed||[]).forEach(a=>rows.push(`<div class="alert chg">🔄 ${esc(a.competitor)} ${esc(a.nct_id||'')}：${esc(a.field)} ${esc(a.from)} → ${esc(a.to)}</div>`));
+  (ca.earlier_readout||[]).forEach(a=>rows.push(`<div class="alert early">⏰ ${esc(a.competitor)} ${esc(a.nct_id||'')}：${esc(a.detail)}</div>`));
+  const body = rows.length?`<div class="alert-list">${rows.join('')}</div>`
+    :`<div class="muted small">自上次快照以来无变化。</div>`;
+  return `<div class="panel collapsible" id="pa">
+    <h2 onclick="toggle('pa')">🔔 变更告警 <span class="tag">相比上次刷新 (${esc(ca.prior_ts||'')})</span>
+      <span class="chev">▾</span></h2><div class="body">${body}</div></div>`;
+}
+
+function trendsHtml(tr){
+  if(!tr || !tr.enough){
+    return `<div class="panel"><h2 style="cursor:default">📈 趋势图</h2>
+      <div class="muted small">${esc(tr?tr.note:'趋势数据积累中(需 ≥2 次刷新)')}
+       （当前快照数：${tr?tr.snapshot_count:0}）</div></div>`;
+  }
+  return `<div class="panel collapsible" id="pt">
+    <h2 onclick="toggle('pt')">📈 趋势图 <span class="tag">基于 ${tr.snapshot_count} 次快照 · 赛道加热/降温 + 竞品阶段推进</span>
+      <span class="chev">▾</span></h2>
+    <div class="body"><div class="grid2">
+      <div class="chartbox sm"><canvas id="trendMetrics"></canvas></div>
+      <div class="chartbox sm"><canvas id="trendTraj"></canvas></div>
+    </div></div></div>`;
+}
+
+// ---- quadrant chart ----
+const TIER_COLOR=s=>s>=7?'#e74c3c':s>=4.5?'#e67e22':s>=2.5?'#f1c40f':'#2ecc71';
+
+// --- ★ Our-product star data (closure, available before chart creation) ---
+let _ourStarData = null;
+
+// ★ Plugin: draw our-product star + quadrant lines after chart renders
+const ourProductPlugin = {
+  id: 'ourProductOverlay',
+  afterDraw(chart) {
+    // Read from _ourStarData (set before chart creation) or chart instance (fallback)
+    const v = _ourStarData || chart._ourProductData;
+    if (!v) return;
+    const {x, y, label, ourY} = v;
+    const ctx = chart.ctx, xa = chart.scales.x, ya = chart.scales.y;
+    if (!ctx || !xa || !ya) return;
+    const px = xa.getPixelForValue(x), py = ya.getPixelForValue(y);
+    if (!isFinite(px) || !isFinite(py)) return;
+    
+    // ★ Star — draw an actual star shape (5-pointed)
+    ctx.save();
+    const starSize = 30;
+    const spikes = 5; const outerR = starSize / 2; const innerR = outerR * 0.45;
+    ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const r = i % 2 === 0 ? outerR : innerR;
+      const angle = (Math.PI * i) / spikes - Math.PI / 2;
+      const sx = px + r * Math.cos(angle);
+      const sy = py + r * Math.sin(angle);
+      i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+    }
+    ctx.closePath();
+    ctx.fillStyle = '#0033A0';
+    ctx.fill();
+    ctx.strokeStyle = '#001a52';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+    
+    // Label below star
+    ctx.save();
+    ctx.font = 'bold 12px "Microsoft YaHei",sans-serif';
+    ctx.fillStyle = '#0033A0';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('我方 ' + label.split('(')[0].trim(), px, py + starSize * 0.55);
+    ctx.restore();
+    
+    // Quadrant divider lines
+    const midX = xa.getPixelForValue(4), midY = ya.getPixelForValue(4.5);
+    const left = xa.getPixelForValue(-0.5), right = xa.getPixelForValue(9.5);
+    const top = ya.getPixelForValue(11), bottom = ya.getPixelForValue(-0.5);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(107,114,128,0.25)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke();
+    // Quadrant labels (clamp to visible area)
+    ctx.font = '11px "Microsoft YaHei",sans-serif';
+    ctx.fillStyle = 'rgba(107,114,128,0.5)';
+    ctx.textAlign = 'right'; ctx.fillText('领先威胁', right - 10, top + 16);
+    ctx.textAlign = 'left'; ctx.fillText('高潜早期', left + 10, top + 16);
+    ctx.textAlign = 'right'; ctx.fillText('后期平庸', right - 10, bottom - 6);
+    ctx.textAlign = 'left'; ctx.fillText('早期观察', left + 10, bottom - 6);
+    ctx.restore();
+  }
+};
+
+Chart.register(ourProductPlugin);
+function drawQuadrant(v){
+  const ctx=document.getElementById('quadChart'); if(!ctx) return;
+  // Filter our product from competitor bubbles (dynamic by our_product name)
+  const ourCore=v.our_product.split('(')[0].trim().toLowerCase();
+  const pts=v.competitors.filter(c=>c.trial_count>0&&!c.competitor.toLowerCase().includes(ourCore)).map(c=>({
+    x:c.quad_x, y:c.quad_y, r:Math.min(18,4+(c.trial_count||1)*1.3),
+    label:c.competitor, new:c.new_entrant, quad:c.quadrant
+  }));
+  const ds=[{
+    label:'竞品 (同靶点)', data:pts,
+    backgroundColor:pts.map(p=>p.new?'rgba(198,120,221,.6)':hexA(TIER_COLOR(p.y),.5)),
+    borderColor:pts.map(p=>p.new?'#c678dd':TIER_COLOR(p.y)), borderWidth:1.5
+  }];
+  // ★ 我方产品 position (computed before chart creation so plugin can access)
+  const ourX=phaseRank([v.our_phase]);
+  // Get actual threat score from competitor data, not hardcoded
+  const us=v.competitors.find(c=>c.competitor.toLowerCase().includes(ourCore.slice(0,6)));
+  const ourY=us?us.quad_y:5.0;
+  // Set star data BEFORE chart creation — plugin's afterDraw will read _ourStarData
+  _ourStarData = {x: ourX, y: ourY, label: v.our_product};
+  // ★ Bubble dataset for tooltip + click interaction (keep it small, no redundant pointStyle)
+  ds.push({label:'★ 我方 '+v.our_product, data:[{x:ourX,y:ourY,r:6}],
+    backgroundColor:'transparent', borderColor:'transparent', borderWidth:0});
+  const ch=new Chart(ctx,{type:'bubble',data:{datasets:ds},options:{
+    responsive:true,maintainAspectRatio:false,
+    onClick:(e,els)=>{ if(els.length){const d=els[0];
+      const p=ds[d.datasetIndex].data[d.index]; if(p&&p.label) highlightRow(p.label);}},
+    plugins:{
+      legend:{display:true,position:'bottom',labels:{color:'#374151',font:{size:12},padding:16,usePointStyle:true,pointStyleWidth:10}},
+      tooltip:{callbacks:{label:c=>{const p=c.raw;
+        return `${p.label} | ${p.quad||''} | 威胁${p.y} 进度${p.x}`;}}}
+    },
+    scales:{
+      x:{min:-0.5,max:9.5,title:{display:true,text:'研发进度 →',color:'#6b7280',font:{size:13}},
+        grid:{color:'#e5e7eb'},ticks:{color:'#6b7280',stepSize:1}},
+      y:{min:-0.5,max:11,title:{display:true,text:'威胁/疗效强度 →',color:'#6b7280',font:{size:13}},
+        grid:{color:'#e5e7eb'},ticks:{color:'#6b7280',stepSize:1}}
+    }
+  }});
+  _charts.push(ch);
+  // Also store on chart instance as fallback
+  ch._ourProductData = _ourStarData;
+}
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);
+  return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+
+
+// ---- trend charts ----
+function drawTrends(tr){
+  if(!tr||!tr.enough) return;
+  const m=document.getElementById('trendMetrics');
+  if(m){ const ch=new Chart(m,{type:'line',data:{labels:tr.labels.map(shortTs),
+    datasets:[
+      mk('试验总数',tr.series.trials_total,'#4a9eff'),
+      mk('玩家数',tr.series.players,'#c678dd'),
+      mk('后期试验',tr.series.late_phase,'#e67e22'),
+      mk('已发表',tr.series.published_total,'#2ecc71'),
+    ]},options:lineOpts('赛道指标趋势')}); _charts.push(ch); }
+  const t=document.getElementById('trendTraj');
+  if(t){ const colors=['#4a9eff','#e74c3c','#2ecc71','#f1c40f','#c678dd','#e67e22'];
+    const ds=tr.trajectories.slice(0,6).map((tj,i)=>({
+      label:tj.competitor, borderColor:colors[i%6], backgroundColor:colors[i%6],
+      data:tj.points.map(p=>p.rank), tension:.2, spanGaps:true}));
+    const ch=new Chart(t,{type:'line',
+      data:{labels:tr.labels.map(shortTs),datasets:ds},
+      options:lineOpts('竞品阶段推进轨迹 (Y=阶段秩)')}); _charts.push(ch); }
+}
+function mk(label,data,color){return {label,data,borderColor:color,
+  backgroundColor:color,tension:.2,fill:false};}
+function shortTs(t){return (t||'').replace(/T.*/,'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3');}
+function lineOpts(title){return {responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#1a1a2e',boxWidth:12,font:{size:11}}},
+    title:{display:true,text:title,color:'#374151',font:{size:12}}},
+  scales:{x:{grid:{color:'#e5e7eb'},ticks:{color:'#6b7280',font:{size:10}}},
+    y:{grid:{color:'#e5e7eb'},ticks:{color:'#6b7280'},beginAtZero:true}}};}
+
+// ---- detailed table ----
+function drawTable(v){
+  const comps=sortComps(v.competitors);
+  const rows=comps.map((c,i)=>compRow(c,i)).join('');
+  document.getElementById('tableWrap').innerHTML=`
+    <table><thead><tr>
+      <th>竞品</th><th>公司</th><th>最高阶段</th><th>试验数</th>
+      <th>综合威胁</th><th>预计读出</th><th>关键疗效(间接比较)</th>
+      <th>中国CDE/NMPA</th><th>象限</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+function tierPill(y){const c=TIER_COLOR(y);
+  const lab=y>=7?'Tier1':y>=4.5?'Tier2':y>=2.5?'Tier3':'Tier4';
+  return `<span class="pill" style="background:${c}">${lab} ${y}</span>`;}
+function compRow(c,i){
+  const isOur=c.competitor&&c.competitor.includes(currentProduct());
+  const eff=c.key_efficacy
+    ? `<span title="${esc(c.key_efficacy.population_note||'')}">${esc(c.key_efficacy.text)}</span>
+       <span class="badge b-fuzzy">间接</span>
+       ${c.key_efficacy.pmid ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${esc(c.key_efficacy.pmid)}" target="_blank" class="small">PMID</a>` : ''}`
+    : c.trial_count>0
+      ? `<span class="muted small">📝 数据待发表</span>`
+      : c.trial_count===0
+        ? `<span class="muted small">—</span>`
+        : `<span class="muted small">🔍 待检索</span>`;
+  const cde=(c.cde&&c.cde.length)
+    ? c.cde.map(x=>`<span class="badge b-cde">${esc(x.cde_stage)}</span>`).join(' ')
+    : `<span class="muted small">—</span>`;
+  const pubLink=c.pubmed_links&&c.pubmed_links.length
+    ?` <a href="${esc(c.pubmed_links[0].url)}" target="_blank" class="small" title="${esc(c.pubmed_links[0].title||'')}">PMID ${esc(c.pubmed_links[0].pmid)}</a>`:'';
+  const badges=(c.new_entrant?`<span class="badge b-new">🆕新发现</span>`:'')
+    +(c.published_any?`<span class="badge b-pub">📄已发表</span>${pubLink}`:'');
+  const readout=c.next_readout?esc(c.next_readout):'<span class="muted small">—</span>';
+  return `<tr class="crow" id="row-${i}" onclick="toggleDetail(${i})"${isOur?' style="background:#e8f0fe"':''}>
+    <td><b>${esc(c.competitor)}</b>${badges}</td>
+    <td class="small">${esc(c.company||'—')}</td>
+    <td>${esc(topPhase(c.phases)||'—')}</td>
+    <td>${c.trial_count}</td>
+    <td>${tierPill(c.quad_y)}</td>
+    <td class="small">${readout}</td>
+    <td class="small">${eff}</td>
+    <td>${cde}</td>
+    <td class="small">${isOur?'★ 我方':esc(c.quadrant||'—')}</td>
+  </tr>
+  <tr id="det-${i}" style="display:none${isOur?';background:#e8f0fe':''}"><td colspan="9">${detailHtml(c)}</td></tr>`;
+}
+function detailHtml(c){
+  const tr=(c.trials||[]).map(t=>{
+    const pub=t.published
+      ?(t.pub_match_type==='exact'
+        ?`<span class="badge b-pub">📄已发表</span>`
+        :`<span class="badge b-fuzzy">疑似(待确认)</span>`):'';
+    const pubLinks=(t.publications||[]).map(p=>
+      `<a href="${esc(p.url)}" target="_blank">PMID ${esc(p.pmid)}</a>`).join(' · ');
+    const readout=t.readout_actual
+      ?`${esc(t.readout_actual)} <span class="muted">(${esc(t.readout_basis||'实证')})</span>`
+      :(t.estimated_readout?`${esc(t.estimated_readout)} <span class="muted">(估算)</span>`:'—');
+    return `<tr>
+      <td><a href="${esc(t.url)}" target="_blank">${esc(t.nct_id)}</a> ${pub}</td>
+      <td class="small">${esc(t.title||'')}</td>
+      <td>${esc(t.phase||'—')}</td>
+      <td class="small">${esc(t.status||'—')}</td>
+      <td>${esc(t.enrollment||'—')}</td>
+      <td class="small">${esc(t.start_date||'')}~${esc(t.completion_date||'')}</td>
+      <td class="small">${readout}</td>
+      <td class="small">${pubLinks||'<span class="muted">—</span>'}</td>
+    </tr>`;}).join('');
+  const evRows=(c.evidence||[]).map(e=>`<tr>
+      <td>${esc(e.endpoint)}</td><td>${esc(e.value)}${esc(e.unit)}</td>
+      <td class="small">${esc(e.comparator||'—')}</td><td>${esc(e.n||'—')}</td>
+      <td class="small">${esc(e.readout_date||'')}</td>
+      <td class="small">${esc(e.source||'')}</td>
+      <td class="small muted">${esc(e.population_note||'')}</td></tr>`).join('');
+  const evBlock=evRows?`<h4 class="small muted" style="margin:10px 0 4px">疗效明细(间接比较，注意人群差异)</h4>
+    <table><thead><tr><th>终点</th><th>数值</th><th>对照</th><th>N</th>
+      <th>读出</th><th>来源</th><th>人群备注</th></tr></thead><tbody>${evRows}</tbody></table>`
+    :`<div class="muted small" style="margin-top:8px">${c.trial_count>0?'📝 数据待发表':c.trial_count===0?'—':'🔍 待检索'}（依赖Excel③/证据地图管线）。</div>`;
+  return `<div class="detail">
+    <h4 class="small muted" style="margin-bottom:4px">临床试验明细 (${(c.trials||[]).length})</h4>
+    <table><thead><tr><th>NCT</th><th>标题</th><th>阶段</th><th>状态</th>
+      <th>入组</th><th>起止</th><th>读出</th><th>文献</th></tr></thead>
+      <tbody>${tr||'<tr><td colspan="8" class="muted small">无 CT.gov 试验(仅名单/CDE 来源)</td></tr>'}</tbody></table>
+    ${evBlock}
+  </div>`;
+}
+function toggleDetail(i){
+  const d=document.getElementById('det-'+i);
+  if(d) d.style.display = d.style.display==='none'?'table-row':'none';
+}
+function highlightRow(label){
+  const v=getView(); const comps=sortComps(v.competitors);
+  const idx=comps.findIndex(c=>c.competitor===label);
+  if(idx<0) return;
+  const row=document.getElementById('row-'+idx);
+  if(row){ row.scrollIntoView({behavior:'smooth',block:'center'});
+    row.style.transition='background .3s'; row.querySelectorAll('td').forEach(td=>td.style.background='#dbeafe');
+    setTimeout(()=>row.querySelectorAll('td').forEach(td=>td.style.background=''),1200);
+    toggleDetail(idx);
+  }
+}
+function toggle(id){ document.getElementById(id).classList.toggle('collapsed'); }
+
+// boot
+initSelectors();
+render();
+
+</script>
+<div style="text-align:center;padding:12px;color:var(--muted);font-size:11px;border-top:1px solid var(--line);margin-top:24px">
+  数据截止: 2026-06-25T03:46:13+00:00 · CT.gov 17 trials · PubMed 18 条证据 · 覆盖 3 适应症 · 竞品圈定: 同靶点×同适应症
+</div>
+</body>
+</html>

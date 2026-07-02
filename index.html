@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>丁晴 · 医学情报 × AI系统设计</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fb;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --line: #e2e8f0;
+    --primary: #1e3a5f;
+    --accent: #d97706;
+    --accent-light: #fef3c7;
+    --link: #2563eb;
+    --link-light: #eff6ff;
+    --green: #059669;
+    --green-light: #d1fae5;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75; font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,.9); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line); padding: 0 24px;
+  }
+  nav .nav-inner { max-width: 880px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+  nav .logo { font-weight: 700; font-size: 16px; color: var(--primary); }
+  nav .nav-links { display: flex; gap: 20px; }
+  nav .nav-links a { text-decoration: none; color: var(--text-secondary); font-size: 13px; font-weight: 500; transition: color .15s; }
+  nav .nav-links a:hover { color: var(--accent); }
+
+  /* Hero */
+  .hero {
+    padding: 120px 0 80px; text-align: center;
+    background: linear-gradient(180deg, #f7f8fb 0%, #ffffff 100%);
+  }
+  .hero .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
+  .hero h1 { font-size: 42px; font-weight: 800; color: var(--text); letter-spacing: -1px; line-height: 1.25; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero .subtitle { font-size: 18px; color: var(--text-secondary); margin-top: 14px; font-weight: 400; max-width: 600px; margin-left: auto; margin-right: auto; }
+  .hero .meta { font-size: 13px; color: var(--text-muted); margin-top: 22px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .hero .meta span { background: var(--bg-soft); padding: 5px 14px; border-radius: 20px; }
+
+  /* Sections */
+  section { padding: 72px 0; }
+  section.alt { background: var(--bg-soft); }
+  .section-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+  .section-title { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 10px; letter-spacing: -.5px; }
+  .section-desc { font-size: 15px; color: var(--text-secondary); max-width: 620px; line-height: 1.8; margin-bottom: 36px; }
+
+  /* Card Grid */
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; transition: border-color .2s;
+  }
+  .card:hover { border-color: #cbd5e1; }
+  .card .c-icon { font-size: 26px; margin-bottom: 10px; }
+  .card h4 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+
+  /* Architecture */
+  .arch-block {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center;
+  }
+  .arch-diagram { background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .arch-diagram svg { width: 100%; height: auto; }
+  .arch-text h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .arch-text p { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+  .arch-text .agent-list { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .arch-text .agent-list span {
+    font-size: 12px; padding: 3px 10px; border-radius: 6px;
+    background: var(--bg-soft); color: var(--text-secondary); border: 1px solid var(--line);
+  }
+
+  /* Demo Block */
+  .demo-block { margin-top: 48px; padding-top: 40px; border-top: 1px solid var(--line); }
+  .demo-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+  .demo-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .demo-header h3 { font-size: 20px; font-weight: 700; color: var(--text); }
+  .demo-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; letter-spacing: .5px; }
+  .demo-tag.interactive { background: var(--link-light); color: var(--link); }
+  .demo-tag.case { background: var(--green-light); color: var(--green); }
+  .demo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+  .demo-preview {
+    background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; min-height: 200px; display: flex; align-items: center; justify-content: center;
+  }
+  .demo-preview iframe { width: 100%; height: 400px; border: none; }
+  .demo-preview .placeholder { padding: 48px 32px; text-align: center; color: var(--text-muted); font-size: 14px; }
+  .demo-preview .placeholder .big { font-size: 40px; display: block; margin-bottom: 10px; }
+
+  .demo-info h4 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .demo-info > p { font-size: 14px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .stat-badge {
+    background: var(--bg-soft); border-radius: var(--radius-sm);
+    padding: 10px 14px; text-align: center; min-width: 70px;
+  }
+  .stat-badge .val { font-size: 22px; font-weight: 800; color: var(--text); }
+  .stat-badge .lbl { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .tag-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tag-row span { font-size: 11px; padding: 2px 8px; border-radius: 5px; background: var(--bg-soft); color: var(--text-secondary); border: 1px solid var(--line); }
+
+  .btn {
+    display: inline-block; padding: 9px 20px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600; text-decoration: none; transition: all .15s;
+    cursor: pointer; border: none;
+  }
+  .btn-primary { background: var(--link); color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-outline { background: transparent; color: var(--link); border: 1.5px solid var(--link); }
+  .btn-outline:hover { background: var(--link-light); }
+
+  /* Flow */
+  .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: 28px 0; }
+  .flow-step {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 14px 18px; text-align: center; min-width: 80px; font-size: 12px; font-weight: 600; color: var(--text);
+  }
+  .flow-arrow { font-size: 18px; color: var(--text-muted); margin: 0 5px; }
+
+  /* Footer */
+  footer {
+    background: var(--primary); color: rgba(255,255,255,.65); padding: 40px 0; text-align: center;
+    font-size: 13px; line-height: 2;
+  }
+  footer strong { color: #fff; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 30px; }
+    .hero .subtitle { font-size: 16px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .arch-block { grid-template-columns: 1fr; }
+    .demo-row { grid-template-columns: 1fr; }
+    .flow-row { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .demo-preview iframe { height: 280px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">丁晴</div>
+    <div class="nav-links">
+      <a href="#about">背景</a>
+      <a href="#architecture">系统架构</a>
+      <a href="#works">作品</a>
+      <a href="#contact">联系</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ ① HERO ═══ -->
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Medical Intelligence × AI System Design</div>
+    <h1>你好，我是<em>丁晴</em>。<br>把医学情报工作，拆成了可复用的 AI 多智能体系统。</h1>
+    <p class="subtitle">
+      临床医学本科 · 9个治疗领域乙方经验 · 罗氏制药 MI+MR+私域运营<br>
+      自建9-Agent工作系统，覆盖竞品情报、文献检索、质检审计全链路
+    </p>
+    <div class="meta">
+      <span>📍 上海</span>
+      <span>罗氏制药 MI+MR+私域运营</span>
+      <span>临床医学本科</span>
+      <span>9领域乙方经验</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ ② ABOUT ═══ -->
+<section id="about">
+  <div class="container">
+    <div class="section-eyebrow">背景</div>
+    <h2 class="section-title">我是谁</h2>
+    <p class="section-desc">
+      医学出身，做过乙方，待过药企——关键是，把"怎么做医学情报"这件事，从个人经验变成了系统。
+    </p>
+    <div class="card-grid">
+      <div class="card">
+        <div class="c-icon">🏥</div>
+        <h4>医学背景</h4>
+        <p>
+          临床医学本科<br>
+          9个治疗领域乙方医学事务经验（2016-2025），服务多家跨国药企<br>
+          罗氏制药 MI+MR+私域运营（2025-2026）
+        </p>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">
+          MI: NS·OPH·抗流感 &nbsp;|&nbsp; MR: OPH·NS
+        </p>
+      </div>
+      <div class="card">
+        <div class="c-icon">🤖</div>
+        <h4>AI 系统能力</h4>
+        <p>
+          自建 AI 多智能体工作系统<br>
+          9个专业 Agent 分工协作<br>
+          竞品情报 · 文献检索 · 质检审计<br>
+          全链路自动化，不是调 API
+        </p>
+      </div>
+      <div class="card">
+        <div class="c-icon">🎯</div>
+        <h4>产品视角</h4>
+        <p>
+          把临床问题拆成可交付的产品<br>
+          参数化设计，换靶点换适应症即用<br>
+          跨治疗领域复用框架<br>
+          从需求到交付的完整闭环
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ③ ARCHITECTURE ═══ -->
+<section id="architecture" class="alt">
+  <div class="container">
+    <div class="section-eyebrow">系统架构</div>
+    <h2 class="section-title">AI 多智能体工作系统</h2>
+    <p class="section-desc">
+      从数据采集到最终交付，不是一个模型在干活——是 9 个专业 Agent 各司其职、分层协作。
+      每个 Agent 有明确的输入/输出契约，形成可审计的自动化管线。
+    </p>
+    <div class="arch-block">
+      <div class="arch-diagram">
+        <!-- 9-Agent Architecture SVG -->
+        <svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+          <!-- Layer 1: Data Sources -->
+          <rect x="60" y="10" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+          <text x="200" y="30" text-anchor="middle" font-size="11" fill="#475569" font-weight="600">数据源层</text>
+          <text x="200" y="46" text-anchor="middle" font-size="9" fill="#94a3b8">CT.gov · PubMed · CDE · Citeline · openFDA</text>
+
+          <!-- Arrow -->
+          <line x1="200" y1="54" x2="200" y2="72" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+          <!-- Layer 2: Collection -->
+          <rect x="60" y="72" width="280" height="58" rx="6" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.2"/>
+          <text x="200" y="92" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">采集层 · 情报员 Agent</text>
+          <text x="200" y="108" text-anchor="middle" font-size="9" fill="#64748b">多源并发检索 · 竞品发现 · 别名归一 · 数据标准化</text>
+          <text x="200" y="122" text-anchor="middle" font-size="9" fill="#94a3b8">输出：raw.json · competitors.csv · evidence.csv</text>
+
+          <line x1="200" y1="130" x2="200" y2="150" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+          <!-- Layer 3: Processing -->
+          <rect x="60" y="150" width="280" height="58" rx="6" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.2"/>
+          <text x="200" y="170" text-anchor="middle" font-size="11" fill="#166534" font-weight="600">加工层 · 分析师 + 码手 Agent</text>
+          <text x="200" y="186" text-anchor="middle" font-size="9" fill="#64748b">四象限威胁分析 · 适应症隔离 · 证据成熟度评估</text>
+          <text x="200" y="200" text-anchor="middle" font-size="9" fill="#94a3b8">输出：威胁评分 · 适应症矩阵 · 里程碑反推</text>
+
+          <line x1="200" y1="208" x2="200" y2="228" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+          <!-- Layer 4: Rendering (highlighted in amber) -->
+          <rect x="60" y="228" width="280" height="58" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+          <text x="200" y="248" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">渲染层 · 架构师 + 出报告 Agent</text>
+          <text x="200" y="264" text-anchor="middle" font-size="9" fill="#64748b">交互式 HTML · 可视化设计 · 叙事逻辑 · PPT/文档</text>
+          <text x="200" y="278" text-anchor="middle" font-size="9" fill="#94a3b8">输出：index.html · 分析报告 · 演示文稿</text>
+
+          <line x1="200" y1="286" x2="200" y2="306" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+          <!-- Layer 5: QA (highlighted) -->
+          <rect x="60" y="306" width="280" height="58" rx="6" fill="#fef2f2" stroke="#f87171" stroke-width="1.2"/>
+          <text x="200" y="326" text-anchor="middle" font-size="11" fill="#991b1b" font-weight="600">审计层 · 抓虫 QA Agent</text>
+          <text x="200" y="342" text-anchor="middle" font-size="9" fill="#64748b">PMID 全量验证 · IF 精确匹配 · Gate①②④多轮审计</text>
+          <text x="200" y="356" text-anchor="middle" font-size="9" fill="#94a3b8">输出：QA报告 · 错误追踪 · 修复验证</text>
+
+          <line x1="200" y1="364" x2="200" y2="384" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+          <!-- Layer 6: Governance -->
+          <rect x="60" y="384" width="280" height="44" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="200" y="404" text-anchor="middle" font-size="11" fill="#64748b" font-weight="600">治理层 · 驾驭工程 Agent</text>
+          <text x="200" y="420" text-anchor="middle" font-size="9" fill="#94a3b8">系统健康监控 · 配置审计 · 僵尸进程巡检 · Cron 调度</text>
+
+          <!-- Arrow marker -->
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+            </marker>
+          </defs>
+
+          <!-- Side labels -->
+          <line x1="352" y1="94" x2="390" y2="94" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="392" y="97" font-size="9" fill="#94a3b8">情报员</text>
+
+          <line x1="352" y1="172" x2="390" y2="172" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="392" y="175" font-size="9" fill="#94a3b8">分析师</text>
+
+          <line x1="352" y1="250" x2="390" y2="250" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="392" y="253" font-size="9" fill="#94a3b8">架构师</text>
+
+          <line x1="352" y1="328" x2="390" y2="328" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="392" y="331" font-size="9" fill="#94a3b8">抓虫</text>
+
+          <line x1="352" y1="400" x2="390" y2="400" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="392" y="403" font-size="9" fill="#94a3b8">驾驭工程</text>
+
+          <!-- Delivery arrow -->
+          <line x1="200" y1="428" x2="200" y2="460" stroke="#d97706" stroke-width="1.8" marker-end="url(#arrowAmber)"/>
+          <rect x="120" y="462" width="160" height="32" rx="6" fill="#d97706" opacity="0.1"/>
+          <text x="200" y="482" text-anchor="middle" font-size="12" fill="#d97706" font-weight="700">📦 最终交付物</text>
+
+          <defs>
+            <marker id="arrowAmber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#d97706"/>
+            </marker>
+          </defs>
+
+          <!-- Bottom label -->
+          <text x="200" y="508" text-anchor="middle" font-size="9" fill="#64748b">Dashboard / XLSX+MD / 交互式 HTML / PPT</text>
+        </svg>
+      </div>
+      <div class="arch-text">
+        <h4>为什么是「系统」而不是「工具」</h4>
+        <p>
+          一个 GPT 套壳不够——医学情报需要多源数据整合、结构化处理、多层审计。
+          每个 Agent 有独立输入/输出契约，Agent 之间通过规范化数据格式通信，
+          出错时能精确追溯到具体环节。
+        </p>
+        <div class="agent-list">
+          <span>情报员 · 数据采集</span>
+          <span>分析师 · 威胁分级</span>
+          <span>架构师 · 视觉设计</span>
+          <span>码手 · 工程实现</span>
+          <span>出报告 · 文档产出</span>
+          <span>抓虫 QA · 审计</span>
+          <span>驾驭工程 · 系统治理</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.7;">
+          关键不是「有 9 个 Agent」，而是 <strong style="color:var(--accent);">每个环节都有可验证的输出</strong>。
+          QA 层的 PMID 全量验证、IF 精确匹配、Gate 多轮审计，
+          保证了最终交付物的可靠性。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ④ WORKS ═══ -->
+<section id="works">
+  <div class="container">
+    <div class="section-eyebrow">作品</div>
+    <h2 class="section-title">项目案例</h2>
+    <p class="section-desc">
+      所有 Demo 基于公开数据构建，数据来源可溯源。不包含任何企业内部信息。
+    </p>
+
+    <!-- Demo 1: CI Dashboard SHR-A1811 -->
+    <div class="demo-block">
+      <div class="demo-header">
+        <h3>📊 SHR-A1811（HER2 ADC）竞争格局 Dashboard</h3>
+        <span class="demo-tag interactive">交互式</span>
+      </div>
+      <div class="demo-row">
+        <div class="demo-preview">
+          <iframe src="demos/ci-dashboard.html" loading="lazy" sandbox="allow-scripts allow-same-origin" title="SHR-A1811 Dashboard"></iframe>
+        </div>
+        <div class="demo-info">
+          <h4>锚点：恒瑞 HER2 ADC · 竞品全景</h4>
+          <p>整合 ClinicalTrials.gov、PubMed、中国 CDE 公开数据，六步自动化流水线生成交互式竞争格局分析。</p>
+          <div class="stat-row">
+            <div class="stat-badge"><div class="val">731</div><div class="lbl">CT.gov 试验</div></div>
+            <div class="stat-badge"><div class="val">7</div><div class="lbl">适应症分层</div></div>
+            <div class="stat-badge"><div class="val">30</div><div class="lbl">证据条目</div></div>
+            <div class="stat-badge"><div class="val">6步</div><div class="lbl">自动化流水线</div></div>
+          </div>
+          <div class="tag-row">
+            <span>CT.gov API v2</span><span>PubMed E-utilities</span><span>CDE联网检索</span>
+            <span>四象限分析</span><span>适应症隔离</span><span>Canvas可视化</span>
+          </div>
+          <a href="demos/ci-dashboard.html" class="btn btn-primary" target="_blank">🔗 打开完整 Demo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo 2: Literature Pipeline -->
+    <div class="demo-block">
+      <div class="demo-header">
+        <h3>📚 MOGAD 免疫抑制剂文献系统检索</h3>
+        <span class="demo-tag case">案例</span>
+      </div>
+      <div class="demo-row">
+        <div class="demo-preview">
+          <div class="placeholder">
+            <span class="big">📚</span>
+            <strong>131 篇文献 · 21 列结构化输出</strong><br>
+            3 级灵敏度检索 · 3 轮 Gate 审计 · PMID 全量验证<br>
+            <a href="demos/literature.html" style="color:var(--link);font-weight:600;margin-top:8px;display:inline-block;">→ 查看完整方法论</a>
+          </div>
+        </div>
+        <div class="demo-info">
+          <h4>PIO → PubMed → AI → 审计 → 交付</h4>
+          <p>MOGAD 各免疫抑制剂预防复发文献系统检索，覆盖 8 种药物，结构化输出含 OCEBM 证据等级、IF、中文摘要。</p>
+          <div class="stat-row">
+            <div class="stat-badge"><div class="val">131</div><div class="lbl">纳入文献</div></div>
+            <div class="stat-badge"><div class="val">21</div><div class="lbl">结构化列</div></div>
+            <div class="stat-badge"><div class="val">100%</div><div class="lbl">PMID验证</div></div>
+            <div class="stat-badge"><div class="val">3轮</div><div class="lbl">Gate审计</div></div>
+          </div>
+          <div class="tag-row">
+            <span>PIO框架</span><span>3级灵敏度</span><span>OCEBM分级</span>
+            <span>PMID全溯源</span><span>IF精确匹配</span><span>Gate多轮审计</span>
+          </div>
+          <a href="demos/literature.html" class="btn btn-outline">📄 查看完整方法论</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo 3: Uveitis -->
+    <div class="demo-block">
+      <div class="demo-header">
+        <h3>👁️ 葡萄膜炎竞品格局 Dashboard</h3>
+        <span class="demo-tag interactive">交互式</span>
+      </div>
+      <div class="demo-row">
+        <div class="demo-preview">
+          <iframe src="demos/uveitis.html" loading="lazy" sandbox="allow-scripts allow-same-origin" title="葡萄膜炎 Dashboard"></iframe>
+        </div>
+        <div class="demo-info">
+          <h4>跨治疗领域复用案例</h4>
+          <p>基于 Citeline 商业数据库，构建葡萄膜炎领域在研药物竞品格局。与 SHR-A1811 使用同一套 Dashboard 框架，换数据即可覆盖新领域。</p>
+          <div class="stat-row">
+            <div class="stat-badge"><div class="val">~40</div><div class="lbl">在研药物</div></div>
+            <div class="stat-badge"><div class="val">129KB</div><div class="lbl">单文件交付</div></div>
+            <div class="stat-badge"><div class="val">1</div><div class="lbl">框架复用</div></div>
+          </div>
+          <div class="tag-row">
+            <span>Citeline数据</span><span>眼科领域</span><span>跨治疗领域</span>
+            <span>框架复用</span><span>单文件自包含</span>
+          </div>
+          <a href="demos/uveitis.html" class="btn btn-primary" target="_blank">🔗 打开完整 Demo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Framework reuse -->
+    <div class="demo-block">
+      <div class="demo-header">
+        <h3>🔁 框架复用：HRS-4642（KRAS G12D）竞品发现</h3>
+        <span class="demo-tag case">案例</span>
+      </div>
+      <div class="demo-row">
+        <div class="demo-preview">
+          <div class="placeholder">
+            <span class="big">🔁</span>
+            <strong>同一套流水线，换 4 个 CSV，2 分钟生成新 Dashboard</strong><br>
+            14 个 KRAS G12D 竞品 · 3 适应症 · 252 trials<br>
+            <a href="demos/hrs-4642.html" style="color:var(--link);font-weight:600;margin-top:8px;display:inline-block;">→ 查看 HRS-4642 案例</a>
+          </div>
+        </div>
+        <div class="demo-info">
+          <h4>参数化设计：换靶点即用</h4>
+          <p>将 SHR-A1811（HER2 ADC）的 6 步流水线直接复用于 HRS-4642（KRAS G12D），仅需替换产品 CSV 和检索关键词。14 个同靶点竞品全景扫描，含 Zoldonrasib（Phase 3, ORR 52%）、Setidegrasib（Phase 3）等关键竞品疗效对比。</p>
+          <div class="tag-row">
+            <span>参数化设计</span><span>框架复用</span><span>KRAS G12D</span>
+            <span>14竞品</span><span>Phase 3对比</span><span>CT.gov三路搜索</span>
+          </div>
+          <a href="demos/hrs-4642.html" class="btn btn-outline" target="_blank">📄 查看 HRS-4642 案例</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ⑤ CONTACT ═══ -->
+<section id="contact" class="alt">
+  <div class="container" style="text-align:center;">
+    <div class="section-eyebrow">联系</div>
+    <h2 class="section-title">联系我</h2>
+    <p style="font-size:16px;color:var(--text-secondary);margin-bottom:32px;">
+      📧 <a href="mailto:211707245+dqhahahaha@users.noreply.github.com" style="color:var(--link);font-weight:600;">211707245+dqhahahaha@users.noreply.github.com</a>
+    </p>
+    <p style="font-size:12px;color:var(--text-muted);">
+      本页面所有 Demo 基于公开数据构建 · 不包含企业内部信息<br>
+      Hosted on GitHub Pages
+    </p>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="container">
+    <strong>丁晴</strong> · 医学情报 × AI 系统设计<br>
+    本科临床医学 · 罗氏制药 MI+MR+私域运营 · 9 个治疗领域<br>
+    <span style="font-size:11px;color:rgba(255,255,255,.35);">
+      © 2026 · GitHub Pages
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

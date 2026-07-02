@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文献系统检索方法论 · 丁晴</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f7f8fb; --text: #0f172a;
+    --text-secondary: #475569; --text-muted: #94a3b8; --line: #e2e8f0;
+    --primary: #1e3a5f; --accent: #d97706; --link: #2563eb; --link-light: #eff6ff;
+    --green: #059669; --green-light: #d1fae5;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.8; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  nav {
+    background: rgba(255,255,255,.9); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line); padding: 0 24px;
+  }
+  nav .nav-inner { max-width: 760px; margin: 0 auto; display: flex; align-items: center; height: 52px; }
+  nav a { text-decoration: none; color: var(--link); font-size: 13px; font-weight: 500; }
+  header { padding: 60px 0 32px; }
+  header h1 { font-size: 28px; font-weight: 800; color: var(--primary); }
+  header p { font-size: 15px; color: var(--text-secondary); margin-top: 8px; }
+  section { padding: 32px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+  h3 { font-size: 16px; font-weight: 700; color: var(--text); margin: 16px 0 8px; }
+  p, li { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+  ul, ol { margin: 8px 0 16px 20px; }
+  li { margin-bottom: 4px; }
+
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: 24px 0; }
+  .flow-step { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text); min-width: 70px; }
+  .flow-arrow { font-size: 16px; color: var(--text-muted); margin: 0 4px; }
+
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+  .stat-badge { background: var(--bg-soft); border-radius: var(--radius); padding: 12px 16px; text-align: center; min-width: 80px; }
+  .stat-badge .val { font-size: 24px; font-weight: 800; color: var(--text); }
+  .stat-badge .lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: var(--bg-soft); color: var(--text-secondary); font-weight: 600; font-size: 12px; border-bottom: 1px solid var(--line); }
+  td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: var(--text); }
+  .check { color: var(--green); }
+
+  .problem-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 16px 20px; margin: 12px 0; }
+  .problem-box h4 { color: #991b1b; font-size: 14px; margin-bottom: 6px; }
+  .problem-box p, .problem-box li { font-size: 13px; color: #7f1d1d; }
+
+  footer { padding: 40px 0; text-align: center; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--line); margin-top: 40px; }
+
+  @media (max-width: 768px) {
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html">← 返回主页</a>
+  </div>
+</nav>
+
+<header>
+  <div class="container">
+    <h1>📚 MOGAD 免疫抑制剂预防复发 — 文献系统检索</h1>
+    <p>案例展示：从 PIO 检索策略到结构化证据地图的完整管线</p>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>项目概述</h2>
+    <p>
+      针对 MOGAD（髓鞘少突胶质细胞糖蛋白抗体相关疾病）各免疫抑制剂预防复发的系统文献检索项目。
+      该项目展示了从检索策略设计 → 多级灵敏度检索 → AI 辅助筛选 → 结构化提取 → 多层审计的完整流程。
+    </p>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val">131</div><div class="lbl">纳入文献</div></div>
+      <div class="stat-badge"><div class="val">21</div><div class="lbl">结构化列</div></div>
+      <div class="stat-badge"><div class="val">8</div><div class="lbl">覆盖药物</div></div>
+      <div class="stat-badge"><div class="val">3轮</div><div class="lbl">Gate审计</div></div>
+      <div class="stat-badge"><div class="val">100%</div><div class="lbl">PMID验证</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>管线流程</h2>
+    <div class="flow">
+      <div class="flow-step">🔍<br>PIO策略设计</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📋<br>PubMed检索<br><small>3级灵敏度</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🤖<br>AI辅助筛选<br><small>标题+摘要</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📊<br>结构化提取<br><small>21列×127行</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🛡️<br>Gate① 初筛</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🔧<br>Gate② QA检查</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">✅<br>Gate④ 终检</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📦<br>XLSX+MD<br>双格式交付</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>方法论详情</h2>
+
+    <h3>1. 检索策略：PIO 框架 + 3 级灵敏度</h3>
+    <table>
+      <tr><th>级别</th><th>策略</th><th>PubMed 命中</th><th>特点</th></tr>
+      <tr><td>高灵敏度</td><td>广撒网，P 宽 + I 宽 + O 宽</td><td>217</td><td>查全率最高，噪声大</td></tr>
+      <tr><td>中灵敏度 ✅</td><td>精准命中，P 中 + I 中 + O 标准</td><td>240</td><td>查全查准均衡（采纳）</td></tr>
+      <tr><td>低灵敏度</td><td>最窄，P 窄 + I 窄 + O 窄</td><td>64</td><td>查准率最高，漏检风险</td></tr>
+    </table>
+    <p>最终采用<strong>中灵敏度策略</strong>，240 篇命中 → 标题+摘要筛选 → 131 篇纳入。</p>
+
+    <h3>2. 结构化输出：21 列数据字段</h3>
+    <table>
+      <tr><th>列</th><th>内容</th><th>来源</th></tr>
+      <tr><td>PMID</td><td>PubMed 唯一标识（超链接）</td><td>E-utilities API</td></tr>
+      <tr><td>第一作者 / 年份</td><td>作者 + 发表年份</td><td>PubMed 元数据</td></tr>
+      <tr><td>期刊 / IF</td><td>期刊全名 + JCR 影响因子</td><td>JCR 精确匹配（非子串）</td></tr>
+      <tr><td>研究类型</td><td>Cohort / RCT / Case Report 等</td><td>AI 分类 + Gate 交叉验证</td></tr>
+      <tr><td>证据等级</td><td>OCEBM Level 1-5</td><td>自动标注</td></tr>
+      <tr><td>人群 / 样本量</td><td>成人/儿童 + N 值</td><td>AI 提取</td></tr>
+      <tr><td>药物</td><td>涉及免疫抑制剂</td><td>AI 识别 + 人工校验</td></tr>
+      <tr><td>ARR / 无复发率</td><td>核心疗效指标</td><td>AI 提取（标注 N/R 如缺失）</td></tr>
+      <tr><td>中文摘要</td><td>100-200 字中文摘要</td><td>AI 生成（非模板化）</td></tr>
+      <tr><td>疗效/安全摘要</td><td>关键发现一句话</td><td>AI 提取</td></tr>
+      <tr><td>临床意义 / 关键局限</td><td>研究解读</td><td>AI 生成 + 人工审核</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);">共 21 列，上表展示核心字段。完整 21 列包括转换原因、基线时长、洗脱期、随访期等。</p>
+
+    <h3>3. 药物覆盖</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val">73</div><div class="lbl">Rituximab</div></div>
+      <div class="stat-badge"><div class="val">47</div><div class="lbl">IVIG</div></div>
+      <div class="stat-badge"><div class="val">38</div><div class="lbl">Mycophenolate</div></div>
+      <div class="stat-badge"><div class="val">30</div><div class="lbl">Azathioprine</div></div>
+      <div class="stat-badge"><div class="val">15</div><div class="lbl">Tocilizumab</div></div>
+      <div class="stat-badge"><div class="val">9</div><div class="lbl">Eculizumab</div></div>
+      <div class="stat-badge"><div class="val">7</div><div class="lbl">Satralizumab</div></div>
+      <div class="stat-badge"><div class="val">6</div><div class="lbl">Ofatumumab</div></div>
+    </div>
+
+    <h3>4. 审计流程：Gate 多轮质控</h3>
+    <table>
+      <tr><th>Gate</th><th>阶段</th><th>检查范围</th><th>典型发现</th></tr>
+      <tr><td>①</td><td>初筛</td><td>纳入/排除标准、主题相关性</td><td>4 篇主题偏离文献移除（非 MOGAD / 非预防）</td></tr>
+      <tr><td>②</td><td>QA 检查</td><td>PMID 全量验证、IF 精度、研究类型、作者名</td><td>IF 子串匹配 Bug 18 处、研究类型误标 3 处、作者名错 3 处</td></tr>
+      <tr><td>④</td><td>终检</td><td>格式完整性、PMID 超链接、自动筛选、MD 同步</td><td>PMID 超链接全丢（126 个）、MD 索引滞后、摘要英文残余 26 篇</td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>质控案例：Gate② 发现的实际问题</h2>
+
+    <div class="problem-box">
+      <h4>🔴 P1: IF 子串匹配 Bug（18 处）</h4>
+      <p><strong>根因</strong>：使用期刊名字串匹配 JCR IF，导致 'Neurology' 子串误匹配到 12.0（实际 Neurology Neuroimmunology ≈ 8.2）。</p>
+      <p><strong>修复</strong>：改为期刊全名精确匹配 + 人工核查。影响 9 篇 Neurology 子家族期刊、5 篇 Ophthalmology 子家族。</p>
+    </div>
+
+    <div class="problem-box">
+      <h4>🔴 P2: 研究类型标注错误（3 处）</h4>
+      <ul>
+        <li>PMID 32629363：Review → Cohort（121 例国际队列，非综述）</li>
+        <li>PMID 42036830：Review → Cohort（44 例对照研究）</li>
+        <li>PMID 38018493：Cohort → Case Series（标题明确为 Case Series）</li>
+      </ul>
+    </div>
+
+    <div class="problem-box">
+      <h4>🔴 P3: 摘要汉化模板化（127 篇全部重写）</h4>
+      <p><strong>问题</strong>：Gate② 发现中文摘要全部为模板格式 + 英文粘贴，非真正汉化。</p>
+      <p><strong>修复</strong>：127 篇全部重写为纯中文摘要，每篇 80-115 字，覆盖背景/方法/结果/结论，数字与 PubMed 原文严格一致。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>关键设计决策</h2>
+    <ul>
+      <li><strong>3 级灵敏度而非单一检索式</strong>：兼顾查全与查准，避免遗漏（如 NMPA 条件性批准路径的 Phase 2 研究）</li>
+      <li><strong>OCEBM 证据等级标注</strong>：每篇标注 Level 1-5，便于快速定位高质量证据</li>
+      <li><strong>IF 全名精确匹配</strong>：消除子串误匹配，确保数据可信度</li>
+      <li><strong>PMID 全量验证 + Gate 多轮审计</strong>：Gate①→②→④ 逐轮收紧标准，而非一次性检查后即交付</li>
+      <li><strong>双格式交付（XLSX + MD）</strong>：XLSX 供深度分析，MD 供快速查阅与版本比对</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <a href="index.html" style="color:var(--link);">← 返回主页</a><br><br>
+    © 2026 丁晴 · 本案例基于公开文献数据
+  </div>
+</footer>
+
+</body>
+</html>
