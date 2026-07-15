@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>疾病领域知识检索方法 · 丁晴</title>
+<style>
+  :root{--bg:#fffdf9;--soft:#f4f7f3;--blue:#f0f6f6;--card:#fff;--text:#24312d;--sub:#586862;--muted:#8b9994;--line:#dfe7e1;--primary:#355c54;--accent:#bd6247;--link:#3f756d;--link-soft:#eaf4f1}
+  *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.8;-webkit-font-smoothing:antialiased}.container{max-width:920px;margin:auto;padding:0 24px}nav{position:sticky;top:0;background:rgba(255,253,249,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:10}.nav-in{height:54px;display:flex;align-items:center;justify-content:space-between}.nav-in a{color:var(--link);font-size:13px;font-weight:650;text-decoration:none}.nav-in span{font-size:12px;color:var(--muted)}header{padding:76px 0 56px;background:radial-gradient(circle at 84% 22%,rgba(85,123,103,.11),transparent 28%),linear-gradient(180deg,#f7f8f0,#fffdf9)}.eyebrow{font-size:12px;letter-spacing:1.5px;color:var(--accent);font-weight:800;margin-bottom:10px}h1{font-size:38px;line-height:1.25;letter-spacing:-1px}header p{max-width:710px;margin-top:14px;color:var(--sub);font-size:16px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}.chips span{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:#fff;color:var(--sub)}section{padding:54px 0;border-top:1px solid var(--line)}section.soft{background:var(--soft)}h2{font-size:24px;margin-bottom:10px}h3{font-size:16px;margin-bottom:5px}p,li{font-size:14px;color:var(--sub)}.lead{max-width:720px;margin-bottom:26px}.pipeline{display:grid;gap:10px}.pstep{display:grid;grid-template-columns:44px 1fr 160px;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px 18px}.pstep b{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:var(--link-soft);color:var(--link);font-size:12px}.pstep p{font-size:12px}.pstep em{font-style:normal;font-size:11px;color:var(--accent);text-align:right}.identity{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px}.identity div{padding:16px 12px;background:#fff;border:1px solid var(--line);border-radius:12px;text-align:center}.identity b{display:block;color:var(--accent);font-size:12px}.identity span{font-size:11px;color:var(--sub)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}.card.blue{background:linear-gradient(145deg,#fff,#f0f6f6)}.card ul{margin:10px 0 0 18px}.card li{margin:5px 0}.relation{display:grid;grid-template-columns:160px 1fr;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}.relation:last-child{border:0}.relation strong{font-size:12px;color:var(--primary)}.relation p{font-size:12px}.gate-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.gate{padding:16px;background:#fffaf5;border:1px solid #eadfd5;border-radius:12px}.gate strong{display:block;color:var(--accent);font-size:12px;margin-bottom:4px}.gate span{font-size:12px;color:var(--sub)}.callout{margin-top:18px;padding:20px;border-left:3px solid var(--accent);background:#fff8f3;border-radius:0 12px 12px 0}.callout p{font-size:13px}.small{font-size:11px;color:var(--muted);margin-top:14px}footer{padding:36px 0;text-align:center;color:var(--muted);font-size:12px;background:#eef3ef}@media(max-width:760px){h1{font-size:30px}.pstep{grid-template-columns:38px 1fr}.pstep em{grid-column:2;text-align:left}.identity{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.gate-grid{grid-template-columns:1fr 1fr}.nav-in span{display:none}}
+</style>
+</head>
+<body>
+<nav><div class="container nav-in"><a href="../index.html#methodologies">← 返回主页方法论</a><span>公开方法说明 · 不包含内部实现代码</span></div></nav>
+<header><div class="container"><div class="eyebrow">METHOD 02 · DOMAIN INTELLIGENCE</div><h1>疾病领域知识检索</h1><p>把某一疾病领域中的临床试验、候选产品、靶点、公司与合作关系解析为可持续更新的在研图景。重点解决两件最容易踩坑的事：搜全，以及未上市产品的身份去重。</p><div class="chips"><span>疾病领域</span><span>临床试验</span><span>产品身份</span><span>靶点 / MOA</span><span>权利方追溯</span><span>可下钻 Dashboard</span></div></div></header>
+
+<section><div class="container"><h2>从宽搜到可用图景</h2><p class="lead">搜索时追求召回率，分析前再通过身份解析与人工校审提高精确率。任何归并都保留证据和撤销路径。</p><div class="pipeline">
+  <div class="pstep"><b>01</b><div><h3>范围定义</h3><p>明确疾病边界、地区、时间窗、药物形式、在研状态和统计口径。</p></div><em>避免问题边界漂移</em></div>
+  <div class="pstep"><b>02</b><div><h3>宽搜与检索扩展</h3><p>疾病、靶点、MOA、治疗方式首轮宽搜，再用研发代码、通用名、公司旧称、收购与许可方循环扩展。</p></div><em>连续两轮无新增再判断饱和</em></div>
+  <div class="pstep"><b>03</b><div><h3>原始记录与试验解析</h3><p>先保存不可变原始快照；试验层去重只建立关系，不删除无注册号或模糊记录。</p></div><em>零静默丢失</em></div>
+  <div class="pstep"><b>04</b><div><h3>干预拆分与产品候选</h3><p>拆开单药、联合方案、对照和背景治疗，提取名称、形式、靶点、公司与辅助注册号。</p></div><em>组合方案不伪造新资产</em></div>
+  <div class="pstep"><b>05</b><div><h3>身份解析与人工校审</h3><p>只有结构、序列、稳定标识或官方更名等强证据可自动归并；模糊文本只进入候选队列。</p></div><em>精确率优先</em></div>
+  <div class="pstep"><b>06</b><div><h3>质量闸门与 Dashboard</h3><p>未解析身份时整体状态为 partial，产品数、公司排名、靶点拥挤度和白区分析不得包装成正式结论。</p></div><em>先过闸门，再聚合</em></div>
+</div></div></section>
+
+<section class="soft"><div class="container"><h2>五层产品身份模型</h2><p class="lead">“产品”不是一个层级。用五层实体避免把同一分子的多个开发资产混成一个，也避免把同一资产的历史名称重复计数。</p><div class="identity">
+  <div><b>MOIETY</b><span>核心活性分子或治疗实体</span></div>
+  <div><b>ASSET</b><span>公司实际开发的候选产品</span></div>
+  <div><b>PRESENTATION</b><span>盐型、制剂、载体或构型</span></div>
+  <div><b>PROGRAM</b><span>资产 × 适应症 × 地区 × 方案</span></div>
+  <div><b>TRIAL</b><span>单项注册临床试验</span></div>
+</div><div class="callout"><p><strong>统计口径：</strong>靶点/MOA 拥挤度默认按活性实体计数；产品竞争和公司管线默认按研发资产计数；总览同时显示两种口径。联合治疗建立 regimen 关系，不生成虚假的新单药资产。</p></div></div></section>
+
+<section><div class="container"><h2>身份关系不是简单“重复 / 不重复”</h2><div class="grid2">
+  <div class="card"><div class="relation"><strong>same_asset</strong><p>同一研发资产的不同名称、转让前后代码或历史称谓。</p></div><div class="relation"><strong>same_moiety_related_asset</strong><p>核心分子相同，但制剂、前药、构型或开发资产不同。</p></div><div class="relation"><strong>possible_match</strong><p>证据不足的疑似匹配，进入人工校审，不自动删除。</p></div><div class="relation"><strong>different_asset</strong><p>明确为不同分子、形式、序列、构型或偶然同名代码。</p></div></div>
+  <div class="card blue"><h3>只允许强证据自动归并</h3><ul><li>相同结构、序列、CAS、InChIKey、ChEMBL 或稳定内部标识。</li><li>注册记录明确把两个名称列为同一干预。</li><li>公司官方披露更名、许可转让或收购后的代码变化。</li><li>多个独立来源对分子、靶点、形式与项目历史一致映射。</li></ul><h3 style="margin-top:16px">这些只能生成候选</h3><ul><li>名称相似、相同靶点、相同公司或模糊文本。</li><li>大学或医院是试验申办方，但没有资产权属证据。</li></ul></div>
+</div></div></section>
+
+<section class="soft"><div class="container"><h2>最关键的质量闸门</h2><div class="gate-grid">
+  <div class="gate"><strong>记录保全</strong><span>无注册号、无标准名、低置信度记录不得静默消失。</span></div>
+  <div class="gate"><strong>身份可追溯</strong><span>每个资产可回到全部原始名称、来源与支持/反对证据。</span></div>
+  <div class="gate"><strong>公司角色拆分</strong><span>区分试验申办方、当前权利方、原研方、许可方和合作方。</span></div>
+  <div class="gate"><strong>结果一致</strong><span>同一筛选下 KPI、图表、明细和导出数量必须一致。</span></div>
+</div><div class="callout"><p><strong>Dashboard 的职责：</strong>不是把未经解析的数据画得更漂亮，而是让每个聚合数字都能下钻至资产、项目、试验和证据，并清楚显示哪些结论仍待校审。</p></div><p class="small">公开页面描述方法与边界；内部规则库、金标准样本、凭据和自动化实现不在此披露。</p></div></section>
+
+<footer>© 2026 丁晴 · 医学情报 × AI 系统设计</footer>
+</body>
+</html>

@@ -60,6 +60,18 @@
   .b-pub{background:var(--ok);color:#0f1419}
   .b-fuzzy{background:#7a8699;color:#0f1419}
   .b-cde{background:#e74c3c;color:#fff}
+  .reg-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;
+    font-weight:700;margin:0 3px 3px 0;white-space:nowrap}
+  .reg-approved{background:#dff3e7;color:#17633a;border:1px solid #a9d9bc}
+  .reg-review{background:#fff0d6;color:#8a5200;border:1px solid #e8c47f}
+  .reg-ind{background:#e5efff;color:#1f4f94;border:1px solid #b9cff1}
+  .reg-designation{background:#eee7f7;color:#65408a;border:1px solid #cfbde4}
+  .reg-none{background:#edf0f3;color:#596473;border:1px solid #d4d9df}
+  .reg-links{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  .reg-links a{font-size:11px;text-decoration:none;white-space:nowrap}
+  .reg-links a:hover{text-decoration:underline}
+  .reg-table-wrap{overflow-x:auto}
+  .reg-scope{max-width:280px;line-height:1.6}
   .muted{color:var(--muted)}
   .small{font-size:11px}
   .detail{background:#f0f2f5;border-radius:8px;padding:12px;margin:4px 0}
@@ -102,7 +114,7 @@
 <header>
   <h1>我方产品竞争格局盘</h1>
   <div class="sub">我方产品竞争格局盘 · 以我方产品为锚点的详细竞争格局</div>
-  <div class="meta">数据生成时间：2026-07-15T15:36:00+00:00　|　<a class="back" href="../index.html">← 返回个人主页</a></div>
+  <div class="meta">临床数据生成：2026-07-15T15:36:00+00:00　|　监管状态核验：2026-07-16　|　<a class="back" href="../index.html">← 返回个人主页</a></div>
 </header>
 <div class="wrap">
   <div class="controls">
@@ -218,17 +230,19 @@
       </tbody>
     </table>
 
-    <!-- CDE阶段说明 -->
-    <h3>CDE 阶段说明</h3>
+    <!-- 监管状态说明 -->
+    <h3>监管状态说明</h3>
     <table>
       <thead><tr><th>标记</th><th>含义</th></tr></thead>
       <tbody>
-        <tr><td><span class="badge b-cde">NDA受理</span></td><td>新药上市申请已获 CDE 受理，处于审评中</td></tr>
-        <tr><td><span class="badge b-cde">已获批</span></td><td>已获 NMPA 批准上市</td></tr>
-        <tr><td><span class="badge b-cde">III期临床</span></td><td>正在进行 III 期确证性临床试验</td></tr>
+        <tr><td><span class="reg-badge reg-approved">上市批准</span></td><td>特定国家/地区、适应症和人群已获得上市许可</td></tr>
+        <tr><td><span class="reg-badge reg-review">申请审评中</span></td><td>BLA/NDA/MAA 已受理，但不等于获批</td></tr>
+        <tr><td><span class="reg-badge reg-ind">IND/CTA许可</span></td><td>监管机构允许开展临床试验，不等于上市批准</td></tr>
+        <tr><td><span class="reg-badge reg-designation">特殊资格</span></td><td>孤儿药、快速通道等资格；必须注明对应适应症</td></tr>
+        <tr><td><span class="reg-badge reg-none">未获批/待核实</span></td><td>公开资料未显示上市许可，或仍需监管知识库复核</td></tr>
       </tbody>
     </table>
-    <p class="small muted">CDE/NMPA 数据来自手动录入（Excel④），非自动抓取。</p>
+    <p class="small muted">监管状态必须按资产 × 国家/地区 × 适应症 × 日期记录。当前本地版使用监管机构、公司公告和交易所披露的一手链接；生产口径应由注册/医学信息知识库维护。</p>
 
     <!-- 疗效终点缩写 -->
     <h3>疗效终点缩写对照</h3>
@@ -255,6 +269,65 @@ const MODEL = {"generated_at": "2026-07-15T15:36:00+00:00", "products": [{"our_p
 // Selectors (product -> indication) + sort, change-alert area,
 // four-quadrant landscape chart, trend charts, detailed competitor table
 // with in-row trial drill-down.
+
+// Regulatory evidence is intentionally separate from clinical phase data.
+// IND/CTA permission, marketing-application review, special designations,
+// and marketing approval are different regulatory events.
+const REGULATORY = {
+  "JS207": {
+    level:"ind", overall:"中美 IND 获批 · 尚未上市",
+    china:"NMPA 已批准临床试验申请",
+    global:"FDA 已批准 NSCLC 新辅助治疗 II/III 期研究 IND",
+    scope:"当前 NSCLC 场景仍处临床开发；IND 获批仅代表允许开展临床试验。",
+    as_of:"2026-07-16",
+    sources:[
+      {label:"君实：NMPA IND",url:"https://www.junshipharma.com/about/"},
+      {label:"君实：FDA IND（PDF）",url:"https://www.junshipharma.com/wp-content/uploads/2025/12/Press-release-Junshi-Biosciences-Announces-FDAs-Approval-of-IND-Application-for-Phase-23-Clinical-Study-of-JS207-for-the-Neoadjuvant-Treatment-of-NSCLC-Patients.pdf"}
+    ]
+  },
+  "Ivonescimab (AK112/SMT112)": {
+    level:"approved", overall:"中国已上市 · 美国 BLA 审评中",
+    china:"NMPA 已批准两项 NSCLC 适应症；含 PD-L1 阳性一线单药",
+    global:"FDA 已受理 EGFRm NSCLC post-TKI 的 BLA；PDUFA 2026-11-14；该场景获 Fast Track",
+    scope:"中国上市状态与美国申报适应症不同；本页各 NSCLC 场景须逐一核对是否落入批准标签。",
+    as_of:"2026-07-16",
+    sources:[
+      {label:"康方：NMPA sNDA批准",url:"https://www.akesobio.com/en/media/akeso-news/250426/"},
+      {label:"Summit：FDA BLA受理",url:"https://smmttx.com/news/press-releases/news-details/2026/Summit-Therapeutics-Announces-U-S--FDA-Acceptance-of-Biologics-License-Application-BLA-Seeking-Approval-for-Ivonescimab-in-Combination-with-Chemotherapy-in-Treatment-of-Patients-with-EGFRm-NSCLC-Post-TKI-Therapy/default.aspx"}
+    ]
+  },
+  "Pumitamig (BNT327/PM8002/BMS-986545)": {
+    level:"designation", overall:"临床开发中 · 尚未上市",
+    china:"中国及全球均在临床开发；当前未列为上市批准产品",
+    global:"FDA 孤儿药资格仅对应 SCLC；NSCLC 正在全球 III 期开发",
+    scope:"孤儿药资格不等于上市批准，且不能外推为 NSCLC 的监管资格。",
+    as_of:"2026-07-16",
+    sources:[
+      {label:"BioNTech：NSCLC III期",url:"https://www.biontech.com/us/en/home/mediaroom/news/press-releases/2026/05/Global-Data-for-BioNTech-and-Bristol-Myers-Squibb-s-PD-L1xVEGF-A-Bispecific-Pumitamig-Shows-Encouraging-Efficacy-in-Patients-with-Non-Small-Cell-Lung-Cancer-in-ROSETTA-Lung-02-Trial.html"},
+      {label:"BioNTech：FDA孤儿药（SCLC）",url:"https://www.biontech.com/us/en/home/mediaroom/news/press-releases/2025/09/first-disclosure-global-interim-phase-2-data-biontech.html"}
+    ]
+  },
+  "HB0025": {
+    level:"ind", overall:"中美 IND 获批 · 尚未上市",
+    china:"NMPA 已签发药物临床试验批准通知书",
+    global:"FDA IND 于 2020-12 获批",
+    scope:"中美 IND 仅代表获准临床开发；本页 III 期状态不等于已提交或获批上市申请。",
+    as_of:"2026-07-16",
+    sources:[
+      {label:"华奥泰：NMPA + FDA IND",url:"https://www.huaota.com/en/newsshow/15.html"}
+    ]
+  },
+  "IMM2510": {
+    level:"ind", overall:"NMPA IND 获批 · 尚未上市",
+    china:"NMPA 已批准 IMM2510 联合化疗 II 期临床试验",
+    global:"仍为在研资产；未列为已获上市许可产品",
+    scope:"NSCLC 仍处临床开发；静脉 IMM2510 与皮下制剂 IMM2510S 的监管事件应分别记录。",
+    as_of:"2026-07-16",
+    sources:[
+      {label:"宜明昂科：IMM2510 NMPA IND",url:"https://cn.immuneonco.com/science/pdtpipeline/50.html"}
+    ]
+  }
+};
 
 let _charts = [];
 function destroyCharts(){ _charts.forEach(c=>{try{c.destroy()}catch(e){}}); _charts=[]; }
@@ -319,6 +392,7 @@ function render(){
   const c=v.counts;
   app.innerHTML = `
     ${overviewCards(v,c)}
+    ${regulatoryLandscapeHtml(v)}
     ${changeAlertsHtml(v.change_alerts)}
     <div class="panel collapsible" id="pq">
       <h2 onclick="toggle('pq')">🎯 竞争格局四象限图
@@ -361,6 +435,51 @@ function confidenceBadge(level){
 function ownershipSourceLinks(source){
   const links=(source||'').split('|').map(s=>s.trim()).filter(Boolean);
   return links.map((u,i)=>`<a href="${esc(u)}" target="_blank">来源${i+1} ↗</a>`).join(' · ') || '—';
+}
+function regulatoryRecord(name){
+  return REGULATORY[name] || {
+    level:'none', overall:'待核实', china:'待注册/医学信息知识库核实',
+    global:'待核实', scope:'当前公开资料不足，不进入正式监管结论。',
+    as_of:'2026-07-16', sources:[]
+  };
+}
+function regulatoryBadge(r){
+  const level=['approved','review','ind','designation'].includes(r.level)?r.level:'none';
+  return `<span class="reg-badge reg-${level}">${esc(r.overall)}</span>`;
+}
+function regulatorySourceLinks(r){
+  return `<div class="reg-links">${(r.sources||[]).map((s,i)=>
+    `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.label||('监管来源'+(i+1)))} ↗</a>`
+  ).join('') || '<span class="muted small">待补官方链接</span>'}</div>`;
+}
+function regulatoryCompact(name){
+  const r=regulatoryRecord(name);
+  return `${regulatoryBadge(r)}<br><span class="small">${esc(r.china)}</span>${regulatorySourceLinks(r)}`;
+}
+function regulatoryLandscapeHtml(v){
+  const names=[v.our_product,...(v.competitors||[]).map(c=>c.competitor)];
+  const rows=names.map((name,i)=>{
+    const r=regulatoryRecord(name);
+    return `<tr${i===0?' style="background:#e8f0fe"':''}>
+      <td><b>${esc(name)}</b>${i===0?' <span class="badge b-cde">我方</span>':''}</td>
+      <td>${regulatoryBadge(r)}</td>
+      <td class="small">${esc(r.china)}</td>
+      <td class="small">${esc(r.global)}</td>
+      <td class="small reg-scope">${esc(r.scope)}</td>
+      <td class="small">${esc(r.as_of)}</td>
+      <td>${regulatorySourceLinks(r)}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="panel collapsible" id="preg">
+    <h2 onclick="toggle('preg')">🛂 竞品监管状态
+      <span class="tag">按资产 × 地区 × 适应症展示；与临床阶段分开</span><span class="chev">▾</span></h2>
+    <div class="body">
+      <div class="disclaim"><b>判读规则：</b>上市批准、BLA/NDA/MAA受理、IND/CTA临床许可、特殊资格是不同事件。
+        “III期”是研发阶段，不是监管批准；“受理”不等于获批；孤儿药/Fast Track也不等于上市许可。
+        本表展示资产的全球最高公开监管状态，并补充其与当前 NSCLC 场景的适用边界。</div>
+      <div class="reg-table-wrap"><table><thead><tr><th>资产</th><th>全球最高状态</th><th>中国 NMPA/CDE</th><th>美国/全球</th><th>当前场景边界</th><th>核验日期</th><th>可验证来源</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    </div></div>`;
 }
 function ownershipRegistryHtml(v){
   const own=v.our_product_ownership||{};
@@ -634,7 +753,7 @@ function drawTable(v){
     <table><thead><tr>
       <th>竞品</th><th>资产原研/当前权利方</th><th>最高阶段</th><th>试验数</th>
       <th>综合威胁</th><th>预计读出</th><th>关键疗效(间接比较)</th>
-      <th>中国CDE/NMPA</th><th>象限</th>
+      <th>监管状态与核验链接</th><th>象限</th>
     </tr></thead><tbody>${rows}</tbody></table>`;
 }
 function tierPill(y){const c=TIER_COLOR(y);
@@ -651,9 +770,7 @@ function compRow(c,i){
       : c.trial_count===0
         ? `<span class="muted small">—</span>`
         : `<span class="muted small">🔍 待检索</span>`;
-  const cde=(c.cde&&c.cde.length)
-    ? c.cde.map(x=>`<span class="badge b-cde">${esc(x.cde_stage)}</span>`).join(' ')
-    : `<span class="muted small">—</span>`;
+  const regulatory=regulatoryCompact(c.competitor);
   const pubLink=c.pubmed_links&&c.pubmed_links.length
     ?` <a href="${esc(c.pubmed_links[0].url)}" target="_blank" class="small" title="${esc(c.pubmed_links[0].title||'')}">PMID ${esc(c.pubmed_links[0].pmid)}</a>`:'';
   const badges=(c.new_entrant?`<span class="badge b-new">🆕新发现</span>`:'')
@@ -669,7 +786,7 @@ function compRow(c,i){
     <td>${tierPill(c.quad_y)}</td>
     <td class="small">${readout}</td>
     <td class="small">${eff}</td>
-    <td>${cde}</td>
+    <td>${regulatory}</td>
     <td class="small">${isOur?'★ 我方':esc(c.quadrant||'—')}</td>
   </tr>
   <tr id="det-${i}" style="display:none${isOur?';background:#e8f0fe':''}"><td colspan="9">${detailHtml(c)}</td></tr>`;
@@ -713,6 +830,8 @@ function detailHtml(c){
     <div class="disclaim"><b>资产归属：</b>原研方 ${esc(c.originator||'待校审')}；当前权利方 ${esc(c.current_rights_holders||c.company||'待校审')}；
       区域 ${esc(c.rights_scope||'未核实')}。${confidenceBadge(c.ownership_confidence)}
       ${ownershipSourceLinks(c.ownership_source)}<br><span class="muted">${esc(c.ownership_basis||'')}</span></div>
+    <div class="disclaim"><b>监管状态：</b>${regulatoryBadge(regulatoryRecord(c.competitor))}
+      ${esc(regulatoryRecord(c.competitor).scope)} ${regulatorySourceLinks(regulatoryRecord(c.competitor))}</div>
     <h4 class="small muted" style="margin-bottom:4px">临床试验明细 (${(c.trials||[]).length})</h4>
     <table><thead><tr><th>NCT</th><th>标题</th><th>试验申办方</th><th>资产原研/权利方</th><th>阶段</th><th>状态</th>
       <th>入组</th><th>起止</th><th>读出</th><th>文献</th></tr></thead>
@@ -748,7 +867,7 @@ render();
 
 </script>
 <div style="text-align:center;padding:12px;color:var(--muted);font-size:11px;border-top:1px solid var(--line);margin-top:24px">
-  数据截止: 2026-07-15T15:36:00+00:00 · CT.gov 23 trials · PubMed 0 条证据 · 覆盖 4 适应症 · 竞品圈定: 同靶点×同适应症
+  临床数据截止: 2026-07-15T15:36:00+00:00 · 监管状态核验: 2026-07-16 · CT.gov 23 trials · 覆盖 4 适应症 · 竞品圈定: 同靶点×同适应症
 </div>
 </body>
 </html>

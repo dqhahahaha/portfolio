@@ -6,21 +6,22 @@
 <title>丁晴 · 医学情报 × AI系统设计</title>
 <style>
   :root {
-    --bg: #ffffff;
-    --bg-soft: #f7f8fb;
+    --bg: #fffdf9;
+    --bg-soft: #f4f7f3;
+    --bg-blue: #f0f6f6;
     --card: #ffffff;
-    --text: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --line: #e2e8f0;
-    --primary: #1e3a5f;
-    --accent: #d97706;
-    --accent-light: #fef3c7;
-    --link: #2563eb;
-    --link-light: #eff6ff;
-    --green: #059669;
-    --green-light: #d1fae5;
-    --radius: 10px;
+    --text: #24312d;
+    --text-secondary: #586862;
+    --text-muted: #8b9994;
+    --line: #dfe7e1;
+    --primary: #355c54;
+    --accent: #bd6247;
+    --accent-light: #faece5;
+    --link: #3f756d;
+    --link-light: #eaf4f1;
+    --green: #557b67;
+    --green-light: #e9f2ea;
+    --radius: 14px;
     --radius-sm: 6px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,7 +29,7 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
     background: var(--bg); color: var(--text); line-height: 1.75; font-size: 16px;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
   }
   .container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
 
@@ -47,7 +48,10 @@
   /* Hero */
   .hero {
     padding: 120px 0 80px; text-align: center;
-    background: linear-gradient(180deg, #f7f8fb 0%, #ffffff 100%);
+    background:
+      radial-gradient(circle at 18% 22%, rgba(189,98,71,.08), transparent 30%),
+      radial-gradient(circle at 84% 18%, rgba(85,123,103,.09), transparent 28%),
+      linear-gradient(180deg, #fbf7ef 0%, #fffdf9 100%);
   }
   .hero .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
   .hero h1 { font-size: 42px; font-weight: 800; color: var(--text); letter-spacing: -1px; line-height: 1.25; }
@@ -141,6 +145,48 @@
   .method-item strong { display: block; font-size: 13px; margin-bottom: 2px; }
   .method-item span { display: block; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 
+  /* Reusable methodology systems */
+  .methods-section { background: linear-gradient(180deg, #fffdf9 0%, #f4f7f3 100%); }
+  .method-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .method-system {
+    background: rgba(255,255,255,.92); border: 1px solid var(--line); border-radius: 18px;
+    padding: 28px; box-shadow: 0 14px 40px rgba(46,74,65,.055);
+  }
+  .method-system:nth-child(2) { background: linear-gradient(145deg, #ffffff 0%, #f0f6f6 100%); }
+  .method-index { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: 1.5px; }
+  .method-system h3 { margin: 8px 0 8px; font-size: 21px; line-height: 1.4; color: var(--text); }
+  .method-system > p { font-size: 13px; color: var(--text-secondary); line-height: 1.75; }
+  .method-flow { display: grid; gap: 8px; margin: 20px 0; }
+  .method-flow-step {
+    display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start;
+    border-left: 2px solid #c7d9d1; padding: 8px 10px 8px 12px;
+    background: #fbfcfa; border-radius: 0 9px 9px 0;
+  }
+  .method-flow-step b {
+    width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%;
+    background: var(--link-light); color: var(--link); font-size: 11px;
+  }
+  .method-flow-step span { font-size: 12px; color: var(--text-secondary); line-height: 1.65; }
+  .method-flow-step strong { color: var(--text); }
+  .method-gates { border-top: 1px solid var(--line); padding-top: 16px; }
+  .method-gates h4 { font-size: 12px; letter-spacing: .8px; color: var(--primary); margin-bottom: 8px; }
+  .gate-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .gate-tags span {
+    font-size: 11px; color: var(--text-secondary); background: var(--bg-soft);
+    border: 1px solid var(--line); padding: 4px 8px; border-radius: 999px;
+  }
+  .method-link { display: inline-block; margin-top: 16px; color: var(--link); font-size: 12px; font-weight: 700; text-decoration: none; }
+  .method-link:hover { color: var(--accent); }
+  .method-compare {
+    margin-top: 22px; padding: 22px 24px; background: #fffaf5;
+    border: 1px solid #eadfd5; border-radius: 14px;
+  }
+  .method-compare h3 { font-size: 16px; margin-bottom: 12px; }
+  .compare-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .compare-item strong { display: block; color: var(--accent); font-size: 12px; margin-bottom: 4px; }
+  .compare-item span { display: block; color: var(--text-secondary); font-size: 12px; line-height: 1.65; }
+  .method-note { margin-top: 14px; font-size: 11px; color: var(--text-muted); }
+
   /* Flow */
   .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: 28px 0; }
   .flow-step {
@@ -151,15 +197,23 @@
 
   /* Footer */
   footer {
-    background: var(--primary); color: rgba(255,255,255,.65); padding: 40px 0; text-align: center;
+    background: #eef3ef; color: var(--text-secondary); padding: 40px 0; text-align: center;
     font-size: 13px; line-height: 2;
   }
-  footer strong { color: #fff; }
+  footer strong { color: var(--primary); }
 
   /* Responsive */
   @media (max-width: 768px) {
-    .hero h1 { font-size: 30px; }
-    .hero .subtitle { font-size: 16px; }
+    .container { padding: 0 20px; }
+    nav { padding: 0 16px; }
+    nav .logo { font-size: 14px; }
+    nav .nav-links { gap: 14px; }
+    nav .nav-links a { font-size: 11px; }
+    nav .nav-links a:nth-child(1), nav .nav-links a:nth-child(2) { display: none; }
+    .hero { padding: 102px 0 68px; }
+    .hero h1 { font-size: 28px; letter-spacing: -.5px; overflow-wrap: anywhere; }
+    .hero .subtitle { font-size: 15px; }
+    .hero .meta { gap: 8px; }
     .card-grid { grid-template-columns: 1fr; }
     .arch-block { grid-template-columns: 1fr; }
     .demo-row { grid-template-columns: 1fr; }
@@ -167,6 +221,8 @@
     .flow-arrow { transform: rotate(90deg); }
     .demo-preview iframe { height: 280px; }
     .method-grid { grid-template-columns: 1fr; }
+    .method-cards { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -179,6 +235,7 @@
     <div class="nav-links">
       <a href="#about">背景</a>
       <a href="#architecture">系统架构</a>
+      <a href="#methodologies">方法论</a>
       <a href="#works">作品</a>
       <a href="#contact">联系</a>
     </div>
@@ -189,10 +246,10 @@
 <header class="hero">
   <div class="container">
     <div class="eyebrow">Medical Intelligence × AI System Design</div>
-    <h1>你好，我是<em>丁晴</em>。<br>把医学情报工作，拆成了可复用的 AI 多智能体系统。</h1>
+    <h1>你好，我是<em>丁晴</em>。<br>把医学问题，做成可检索、可去重、可追溯的情报系统。</h1>
     <p class="subtitle">
-      生物工程硕士 · 3年医学事务与医学情报经验 · 罗氏制药 MI+MR+私域运营<br>
-      自建9-Agent工作系统，覆盖竞品情报、文献检索、质检审计全链路
+      从多数据库文献检索到疾病领域在研图景，用可审计的方法回答：<br>
+      证据在哪里、产品是谁、竞争如何变化。
     </p>
     <div class="meta">
       <span>📍 上海</span>
@@ -370,7 +427,72 @@
   </div>
 </section>
 
-<!-- ═══ ④ WORKS ═══ -->
+<!-- ═══ ④ METHODOLOGIES ═══ -->
+<section id="methodologies" class="methods-section">
+  <div class="container">
+    <div class="section-eyebrow">方法论</div>
+    <h2 class="section-title">两套可复用的医学情报方法</h2>
+    <p class="section-desc">
+      一套回答“证据在哪里、是否搜全”，一套回答“领域里有哪些资产、谁在推进、竞争如何变化”。
+      两者都把来源、判断和不确定性留在结果里，便于复核与持续更新。
+    </p>
+
+    <div class="method-cards">
+      <article class="method-system">
+        <div class="method-index">SYSTEM 01</div>
+        <h3>多数据库文献检索</h3>
+        <p>面向临床研究问题的可审计检索流程。先按问题与用途决定检索灵敏度，再为每个数据库编写专用检索式，避免用一个字符串机械套用所有来源。</p>
+        <div class="method-flow">
+          <div class="method-flow-step"><b>1</b><span><strong>问题结构化</strong><br>明确疾病/人群、干预或暴露、检索模式、时间截止日与纳排标准。</span></div>
+          <div class="method-flow-step"><b>2</b><span><strong>多源专用检索</strong><br>PubMed、Europe PMC、ClinicalTrials.gov 为核心；Crossref 辅助补标识，按条件扩展 OpenAlex。</span></div>
+          <div class="method-flow-step"><b>3</b><span><strong>标准化与去重</strong><br>保留各来源原始记录，用 PMID、DOI、注册号及可解释候选关系合并视图。</span></div>
+          <div class="method-flow-step"><b>4</b><span><strong>筛选与交接</strong><br>逐条记录纳入、排除或待定及原因；检索完整后再交接证据提取。</span></div>
+        </div>
+        <div class="method-gates">
+          <h4>关键质量闸门</h4>
+          <div class="gate-tags">
+            <span>数据库覆盖声明</span><span>分页与截断检查</span><span>检索式/日期/哈希</span>
+            <span>排除理由</span><span>标识符可追溯</span><span>试验与论文分开</span>
+          </div>
+        </div>
+        <a class="method-link" href="demos/literature.html">查看文献检索完整方法 →</a>
+      </article>
+
+      <article class="method-system">
+        <div class="method-index">SYSTEM 02</div>
+        <h3>疾病领域知识检索</h3>
+        <p>面向某一疾病领域的“药物在研图景”。核心不是抓到多少条试验，而是把试验、产品身份、权利方和适应症项目解析成可比较、可下钻的竞争情报。</p>
+        <div class="method-flow">
+          <div class="method-flow-step"><b>1</b><span><strong>宽搜与迭代扩展</strong><br>从疾病、靶点、MOA、药物形式出发，继续用研发代码、历史别名和合作方扩展检索。</span></div>
+          <div class="method-flow-step"><b>2</b><span><strong>记录保全与试验解析</strong><br>先保存不可变原始快照；无注册号、低置信度或模糊匹配记录不得静默消失。</span></div>
+          <div class="method-flow-step"><b>3</b><span><strong>五层产品身份</strong><br>区分活性实体、研发资产、制剂/构型、适应症项目和试验；联合方案单独建模。</span></div>
+          <div class="method-flow-step"><b>4</b><span><strong>证据追溯与图景生成</strong><br>把申办方与资产权利方分开追溯，未解析身份进入人工校审，通过闸门后再计算竞争指标。</span></div>
+        </div>
+        <div class="method-gates">
+          <h4>关键质量闸门</h4>
+          <div class="gate-tags">
+            <span>原始记录零静默丢失</span><span>分子数/资产数双口径</span><span>申办方≠厂家</span>
+            <span>强证据才自动归并</span><span>疑似匹配人工校审</span><span>未通过标记 partial</span>
+          </div>
+        </div>
+        <a class="method-link" href="demos/domain-intelligence.html">查看领域检索完整方法 →</a>
+      </article>
+    </div>
+
+    <div class="method-compare">
+      <h3>共同底座：先建立证据链，再输出结论</h3>
+      <div class="compare-grid">
+        <div class="compare-item"><strong>可追溯</strong><span>每个结论都能回到来源、原始名称和检索上下文。</span></div>
+        <div class="compare-item"><strong>可审计</strong><span>保存检索式、运行时间、版本、筛选或归并理由。</span></div>
+        <div class="compare-item"><strong>可逆设计</strong><span>去重不等于删除；原始记录必须保留，撤销与拆分是生产化闸门。</span></div>
+        <div class="compare-item"><strong>有边界</strong><span>明确数据库覆盖、访问限制、待校审项与医学判断责任。</span></div>
+      </div>
+    </div>
+    <p class="method-note">本页展示公开方法论与工作框架，不公开内部脚本、凭据、私有数据或具体实现代码。</p>
+  </div>
+</section>
+
+<!-- ═══ ⑤ WORKS ═══ -->
 <section id="works">
   <div class="container">
     <div class="section-eyebrow">作品</div>
@@ -391,16 +513,18 @@
         </div>
         <div class="demo-info">
           <h4>以我方产品为锚点，按真实治疗场景比较竞争</h4>
-          <p>围绕君实生物 JS207，在四个 NSCLC 研发场景中同时展示同机制直接竞品、医生可能选择的治疗方案、我方研发进展、资产权利方和单项试验证据。</p>
+          <p>围绕君实生物 JS207，在四个 NSCLC 研发场景中同时展示同机制直接竞品、医生可能选择的治疗方案、我方研发进展、资产权利方、分地区监管状态和单项试验证据；关键判断均提供可验证链接。</p>
           <div class="stat-row">
             <div class="stat-badge"><div class="val">4</div><div class="lbl">NSCLC场景</div></div>
             <div class="stat-badge"><div class="val">4</div><div class="lbl">直接竞品资产</div></div>
             <div class="stat-badge"><div class="val">12</div><div class="lbl">场景方案/基准</div></div>
             <div class="stat-badge"><div class="val">4</div><div class="lbl">我方场景试验</div></div>
+            <div class="stat-badge"><div class="val">5</div><div class="lbl">监管状态资产</div></div>
           </div>
           <div class="tag-row">
             <span>搜全与别名扩展</span><span>产品身份解析</span><span>治疗场景切分</span>
-            <span>动态研发评分</span><span>厂家与申办方分离</span><span>证据可追溯</span>
+            <span>动态研发评分</span><span>厂家与申办方分离</span><span>地区化监管状态</span>
+            <span>一手核验链接</span><span>证据可追溯</span>
           </div>
           <a href="demos/js207.html" class="btn btn-primary" target="_blank">🔗 打开完整 Dashboard</a>
         </div>
@@ -414,16 +538,18 @@
           <div class="flow-step">试验去重</div><div class="flow-arrow">→</div>
           <div class="flow-step">产品身份解析</div><div class="flow-arrow">→</div>
           <div class="flow-step">场景切分</div><div class="flow-arrow">→</div>
+          <div class="flow-step">监管状态核验</div><div class="flow-arrow">→</div>
           <div class="flow-step">同口径评分</div><div class="flow-arrow">→</div>
           <div class="flow-step">证据与人工校审</div>
         </div>
         <div class="method-grid">
           <img src="assets/dashboard-architecture.png" alt="疾病领域、靶点、产品、研发项目与临床试验之间的 Dashboard 架构">
           <div class="method-list">
-            <div class="method-item"><strong>1. 搜全与去重</strong><span>疾病、靶点、MOA、研发代码和公司历史名称多轮扩展；原始记录不删除，归并可解释、可撤销。</span></div>
+            <div class="method-item"><strong>1. 搜全与去重</strong><span>疾病、靶点、MOA、研发代码和公司历史名称多轮扩展；原始记录不删除，归并需可解释，撤销/拆分列为生产化闸门。</span></div>
             <div class="method-item"><strong>2. 五层产品身份</strong><span>区分活性分子、研发资产、具体制剂/构型、适应症项目和试验，避免把盐型、前药、ADC构型或联合方案误当同一产品。</span></div>
             <div class="method-item"><strong>3. 可比较的研发评分</strong><span>我方与竞品都按场景内最高有效阶段和当前状态计算；星形位置随 JS207 自身试验进展动态更新，不代表临床疗效优劣。</span></div>
-            <div class="method-item"><strong>4. 证据与责任边界</strong><span>试验申办方与资产厂家分别追溯；指南适用性由医学信息知识库维护。身份质量闸门未通过时，统计标记为待校审。</span></div>
+            <div class="method-item"><strong>4. 地区化监管状态</strong><span>分别记录上市批准、申请审评、IND/CTA许可和特殊资格，并按国家/地区、适应症、剂型及日期限定；每项状态附一手核验链接。</span></div>
+            <div class="method-item"><strong>5. 证据与责任边界</strong><span>试验申办方与资产厂家分别追溯；监管与指南生产口径由注册/医学信息知识库维护。身份质量闸门未通过时，统计标记为待校审。</span></div>
           </div>
         </div>
       </div>
@@ -521,7 +647,7 @@
   </div>
 </section>
 
-<!-- ═══ ⑤ CONTACT ═══ -->
+<!-- ═══ ⑥ CONTACT ═══ -->
 <section id="contact" class="alt">
   <div class="container" style="text-align:center;">
     <div class="section-eyebrow">联系</div>
@@ -541,7 +667,7 @@
   <div class="container">
     <strong>丁晴</strong> · 医学情报 × AI 系统设计<br>
     生物工程硕士 · 罗氏制药 MI+MR+私域运营 · 3年医学事务经验<br>
-    <span style="font-size:11px;color:rgba(255,255,255,.35);">
+    <span style="font-size:11px;color:var(--text-muted);">
       © 2026 · GitHub Pages
     </span>
   </div>
