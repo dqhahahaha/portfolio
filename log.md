@@ -1,6 +1,6 @@
 # Portfolio 项目日志
 
-## 2026-07-15 · v1.1 待发布
+## 2026-07-15 · v1.1 已发布
 
 - 产品 Dashboard 统一为 **JS207 × NSCLC 产品竞争格局**
 - 下线 SHR-A1811 与 HRS-4642 两个旧产品 Dashboard
