@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我方产品竞争格局盘</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#f5f7fa; --panel2:#e8ecf1; --line:#d5dae3;
+    --txt:#1a1a2e; --muted:#6b7280; --accent:#0033A0;
+    --t1:#e74c3c; --t2:#e67e22; --t3:#d4a017; --t4:#27ae60;
+    --new:#8e44ad; --ok:#27ae60;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.5;font-size:14px}
+  header{background:#0033A0;
+    padding:18px 28px;border-bottom:none}
+  header h1{font-size:20px;font-weight:600;color:#ffffff}
+  header .sub{color:#c0d0f0;font-size:13px;margin-top:4px}
+  header .meta{color:#a0b8e0;font-size:12px;margin-top:6px}
+  header a.back{color:#ffffff;font-size:12px;text-decoration:none;opacity:0.85}
+  .wrap{padding:20px 28px;max-width:1500px;margin:0 auto}
+  .controls{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 18px;margin-bottom:18px}
+  .controls .grp{display:flex;flex-direction:column;gap:4px}
+  .controls label{font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.04em}
+  select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+    border-radius:6px;padding:7px 10px;font-size:13px;min-width:180px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px}
+  .card .n{font-size:26px;font-weight:700;color:var(--accent)}
+  .card .l{color:var(--muted);font-size:12px;margin-top:3px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:16px;margin-bottom:18px}
+  .panel h2{font-size:15px;margin-bottom:12px;display:flex;align-items:center;
+    gap:8px;cursor:pointer}
+  .panel h2 .tag{font-size:11px;color:var(--muted);font-weight:400}
+  .panel h2 .chev{margin-left:auto;color:var(--muted);font-size:12px}
+  .collapsible.collapsed .body{display:none}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);
+    vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11px;
+    text-transform:uppercase;letter-spacing:.03em;cursor:pointer;
+    white-space:nowrap}
+  th:hover{color:var(--txt)}
+  tr.crow{cursor:pointer}
+  tr.crow:hover td{background:var(--panel2)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:11px;font-size:11px;
+    font-weight:600;color:#0f1419}
+  .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;
+    font-weight:600;margin-left:4px}
+  .b-new{background:var(--new);color:#0f1419}
+  .b-pub{background:var(--ok);color:#0f1419}
+  .b-fuzzy{background:#7a8699;color:#0f1419}
+  .b-cde{background:#e74c3c;color:#fff}
+  .muted{color:var(--muted)}
+  .small{font-size:11px}
+  .detail{background:#f0f2f5;border-radius:8px;padding:12px;margin:4px 0}
+  .detail table{font-size:12px}
+  a{color:var(--accent)}
+  .alert-list{display:flex;flex-direction:column;gap:6px}
+  .alert{padding:7px 10px;border-radius:7px;font-size:12px;
+    border-left:3px solid var(--line);background:var(--panel)}
+  .alert.add{border-left-color:var(--new);background:#f3eef8}
+  .alert.chg{border-left-color:var(--accent);background:#e8eef8}
+  .alert.early{border-left-color:var(--t2);background:#fef9ee}
+  .chartbox{position:relative;height:580px;min-height:580px;width:100%}
+  .chartbox canvas{width:100%!important;height:100%!important}
+  .chartbox.sm{height:280px;min-height:280px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .disclaim{font-size:11px;color:var(--muted);background:#fef3cd;
+    border:1px solid #f0d86e;border-radius:6px;padding:8px 10px;margin-bottom:10px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);
+    margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:4px}
+  .dot{width:10px;height:10px;border-radius:50%}
+
+  /* Legend panel inner styles */
+  .legend-panel h3{font-size:13px;font-weight:600;margin:16px 0 8px;color:var(--txt)}
+  .legend-panel h3:first-child{margin-top:0}
+  .legend-panel p,.legend-panel li{font-size:12px;color:var(--txt);line-height:1.7}
+  .legend-panel ul{padding-left:18px;margin:4px 0}
+  .legend-panel ul li{font-size:12px;color:var(--txt)}
+  .legend-panel table{font-size:12px;margin-bottom:4px}
+  .legend-panel table th{font-size:10px}
+  .legend-panel table td{padding:4px 8px}
+  .legend-panel .inline-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  .legend-panel .inline-pill{display:inline-block;padding:1px 6px;border-radius:9px;font-size:10px;font-weight:600;margin:0 2px}
+  .legend-panel .inline-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;margin:0 2px}
+  .legend-panel .fml{font-family:'SF Mono','Fira Code','Consolas',monospace;font-size:11px;background:var(--panel2);padding:2px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>我方产品竞争格局盘</h1>
+  <div class="sub">我方产品竞争格局盘 · 以我方产品为锚点的详细竞争格局</div>
+  <div class="meta">数据生成时间：2026-07-15T15:36:00+00:00　|　<a class="back" href="../index.html">← 返回个人主页</a></div>
+</header>
+<div class="wrap">
+  <div class="controls">
+    <div class="grp">
+      <label>我方产品</label>
+      <select id="selProduct" onchange="onProductChange()"></select>
+    </div>
+    <div class="grp">
+      <label>适应症</label>
+      <select id="selIndication" onchange="render()"></select>
+    </div>
+    <div class="grp">
+      <label>竞品排序</label>
+      <select id="selSort" onchange="render()">
+        <option value="threat">综合威胁分</option>
+        <option value="phase">研发进度</option>
+        <option value="readout">读出紧迫度</option>
+        <option value="efficacy">疗效(有数据优先)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="app"></div>
+</div>
+
+<!-- ===== 📖 图例与定义面板 ===== -->
+<div class="panel collapsible collapsed legend-panel" id="legendPanel">
+  <h2 onclick="toggle('legendPanel')">📖 图例与定义 <span class="chev">▾</span></h2>
+  <div class="body">
+
+    <!-- Phase 分级表 -->
+    <h3>Phase 分级表</h3>
+    <table>
+      <thead><tr><th>代码</th><th>中文</th><th>分数</th></tr></thead>
+      <tbody>
+        <tr><td><span class="fml">EARLY_PHASE1</span></td><td>早期I期</td><td>1</td></tr>
+        <tr><td><span class="fml">PHASE1</span></td><td>I期</td><td>2</td></tr>
+        <tr><td><span class="fml">PHASE1/PHASE2</span></td><td>I/II期</td><td>3</td></tr>
+        <tr><td><span class="fml">PHASE2</span></td><td>II期</td><td>4</td></tr>
+        <tr><td><span class="fml">PHASE2/PHASE3</span></td><td>II/III期</td><td>5</td></tr>
+        <tr><td><span class="fml">PHASE3</span></td><td>III期</td><td>7</td></tr>
+        <tr><td><span class="fml">PHASE4</span></td><td>IV期/上市后</td><td>8</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">分数越高 = 研发越成熟，对竞争格局的威胁越大。同一竞品取所有临床试验的最高阶段分数。</p>
+
+    <!-- Tier 威胁分级 -->
+    <h3>Tier 威胁分级</h3>
+    <table>
+      <thead><tr><th>Tier</th><th>分数</th><th>色标</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td>Tier 1</td><td>≥ 7.0</td><td><span class="inline-dot" style="background:#e74c3c"></span>红</td><td>高威胁</td></tr>
+        <tr><td>Tier 2</td><td>≥ 4.5</td><td><span class="inline-dot" style="background:#e67e22"></span>橙</td><td>中高威胁</td></tr>
+        <tr><td>Tier 3</td><td>≥ 2.5</td><td><span class="inline-dot" style="background:#f1c40f"></span>黄</td><td>中威胁</td></tr>
+        <tr><td>Tier 4</td><td>&lt; 2.5</td><td><span class="inline-dot" style="background:#2ecc71"></span>绿</td><td>低威胁</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 威胁分计算公式 -->
+    <h3>威胁分计算公式</h3>
+    <p><strong>威胁分</strong> = <span class="fml">Phase_Score</span> × <span class="fml">Status_Weight</span>，结果上限 10.0。</p>
+    <p class="small muted">Phase_Score 见上表。Status_Weight 对应临床试验当前状态的成熟度权重：</p>
+    <table>
+      <thead><tr><th>临床试验状态</th><th>权重</th></tr></thead>
+      <tbody>
+        <tr><td><span class="fml">RECRUITING</span></td><td>1.0</td></tr>
+        <tr><td><span class="fml">ACTIVE_NOT_RECRUITING</span></td><td>1.2</td></tr>
+        <tr><td><span class="fml">COMPLETED</span></td><td>1.3</td></tr>
+        <tr><td><span class="fml">ENROLLING_BY_INVITATION</span></td><td>0.9</td></tr>
+        <tr><td><span class="fml">NOT_YET_RECRUITING</span></td><td>0.6</td></tr>
+        <tr><td><span class="fml">UNKNOWN</span></td><td>0.5</td></tr>
+        <tr><td><span class="fml">SUSPENDED</span></td><td>0.3</td></tr>
+        <tr><td><span class="fml">TERMINATED</span></td><td>0.2</td></tr>
+        <tr><td><span class="fml">WITHDRAWN</span></td><td>0.1</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">例：III期（7分）× COMPLETED（1.3）= 9.1 → 高威胁 Tier1（红）。</p>
+
+    <!-- 四象限定义 -->
+    <h3>四象限定义</h3>
+    <p>X轴 = <strong>研发进度</strong>（Phase_Score，0~8），Y轴 = <strong>综合威胁/疗效强度</strong>（0~10），中点 X=4, Y=4.5。</p>
+    <ul>
+      <li><strong>右上（领先威胁）</strong> — 高进度 + 高威胁：核心对手，已进入后期且威胁明确。</li>
+      <li><strong>左上（高潜早期）</strong> — 低进度 + 高威胁：疗效信号强但尚处早期，需动态跟踪。</li>
+      <li><strong>右下（后期平庸）</strong> — 高进度 + 低威胁：后期试验但威胁一般，可能是非头对头。</li>
+      <li><strong>左下（早期观察）</strong> — 低进度 + 低威胁：早期或暂无明确疗效信号，持续监控。</li>
+    </ul>
+    <p class="small muted">★ 标记 = 我方产品。X、Y 均按当前治疗场景内的我方试验动态计算：X 取有效最高阶段，Y 采用与竞品相同的 Phase_Score × Status_Weight。内部维护阶段高于公开注册阶段时，以内部阶段覆盖并明确标注来源。</p>
+
+    <!-- 读出时间 -->
+    <h3>读出时间</h3>
+    <p>读出时间的推算逻辑：</p>
+    <ul>
+      <li><strong>估算</strong> — 根据 PCD（Primary Completion Date）+ 5 个月分析与锁库期反推。当读到具体发表日期时则自动替换。</li>
+      <li><strong>实证</strong> — 已在 PubMed 检索到对应 NCT 编号的正式出版物。</li>
+      <li><strong>疑似已发表(待确认)</strong> — 检索到疑似匹配的出版物，NCT 编号未能直接对应，需人工确认。</li>
+    </ul>
+
+    <!-- 间接比较标注 -->
+    <h3>⚠️ 间接比较标注</h3>
+    <p>跨试验疗效数据并列展示处有 <span class="inline-badge b-fuzzy" style="font-size:10px;padding:1px 6px">间接</span> 标志。不同试验的入组人群、研究设计、数据成熟度各不相同，<strong>不可直接下结论</strong>。具体差异可通过悬停「人群备注」查看。</p>
+
+    <!-- 数据源与标记 -->
+    <h3>数据源与标记</h3>
+    <table>
+      <thead><tr><th>标记</th><th>含义</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill" style="background:#8e44ad;font-size:10px;padding:1px 6px">🆕新发现</span></td><td>CT.gov 自动发现、不在盯防名单内的新竞品</td><td>ClinicalTrials.gov 自动抓取</td></tr>
+        <tr><td><span class="pill" style="background:#27ae60;font-size:10px;padding:1px 6px">📄已发表</span></td><td>有 PubMed 正式出版物对应</td><td>PubMed 自动交叉检索</td></tr>
+        <tr><td><span class="badge b-fuzzy" style="font-size:10px;padding:1px 6px">⚠️间接</span></td><td>跨试验疗效间接比较，不可直接下结论</td><td>证据地图管线 / Excel③</td></tr>
+        <tr><td><span class="badge" style="background:#7a8699;color:#fff;font-size:10px;padding:1px 6px">📌盯防名单</span></td><td>该竞品在手动盯防名单中（Excel②录入）</td><td>手动录入（Excel②）</td></tr>
+        <tr><td>★</td><td>我方产品（四象限图中标记）</td><td>我方产品线（Excel①）</td></tr>
+      </tbody>
+    </table>
+
+    <!-- CDE阶段说明 -->
+    <h3>CDE 阶段说明</h3>
+    <table>
+      <thead><tr><th>标记</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge b-cde">NDA受理</span></td><td>新药上市申请已获 CDE 受理，处于审评中</td></tr>
+        <tr><td><span class="badge b-cde">已获批</span></td><td>已获 NMPA 批准上市</td></tr>
+        <tr><td><span class="badge b-cde">III期临床</span></td><td>正在进行 III 期确证性临床试验</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">CDE/NMPA 数据来自手动录入（Excel④），非自动抓取。</p>
+
+    <!-- 疗效终点缩写 -->
+    <h3>疗效终点缩写对照</h3>
+    <table>
+      <thead><tr><th>缩写</th><th>全称</th><th>中文</th></tr></thead>
+      <tbody>
+        <tr><td>ORR</td><td>Objective Response Rate</td><td>客观缓解率</td></tr>
+        <tr><td>mPFS</td><td>Median Progression-Free Survival</td><td>中位无进展生存期</td></tr>
+        <tr><td>mOS</td><td>Median Overall Survival</td><td>中位总生存期</td></tr>
+        <tr><td>HR</td><td>Hazard Ratio</td><td>风险比</td></tr>
+        <tr><td>CI</td><td>Confidence Interval</td><td>置信区间</td></tr>
+        <tr><td>DCR</td><td>Disease Control Rate</td><td>疾病控制率</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+const MODEL = {"generated_at": "2026-07-15T15:36:00+00:00", "products": [{"our_product": "JS207", "indications": [{"our_product": "JS207", "our_product_ownership": {"asset": "JS207", "originator": "Shanghai Junshi Biosciences", "current_rights_holders": "Shanghai Junshi Biosciences", "rights_scope": "Global", "ownership_basis": "君实生物年度报告明确列为公司自主研发资产", "ownership_source": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0427/2026042701561.pdf", "ownership_confidence": "high", "last_verified": "2026-07-15"}, "indication": "晚期NSCLC一线", "our_phase": "PHASE2", "our_metrics": {"trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06969027", "title": "JS207Combined With Chemotherapy in First-line Treatment of Advanced NSCLC", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2025-11-30", "start_date": "2025-06-19", "completion_date": "2027-12-31", "conditions": ["Non-small Cell Lung Cancer"], "interventions": ["JS207", "Pemetrexed injection", "Platinum", "Paclitaxel"], "lead_sponsor": "Shanghai Junshi Bioscience Co., Ltd.", "collaborators": [], "enrollment": 84, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06969027", "fetched_at": "2026-07-15T14:36:22+00:00", "estimated_readout": "2026-04-01", "months_from_now": -3, "imminent": false, "readout_note": "已读出 (PCD 已过)", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0}], "trial_count": 1, "phases": ["PHASE2"], "registered_phase": "PHASE2", "internal_phase": "PHASE2", "effective_phase": "PHASE2", "effective_status": "RECRUITING", "progress_score": 4, "competitive_score": 4.0, "score_source": "公开注册试验", "quadrant": "后期平庸", "next_readout": "2026-04-01"}, "line": "1L", "mechanism": "PD-1/VEGF bispecific", "competitors": [{"key": "Ivonescimab (AK112/SMT112)", "competitor": "Ivonescimab (AK112/SMT112)", "company": "Akeso / Summit Therapeutics", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT05899608", "title": "Clinical Study of Ivonescimab for First-line Treatment of Metastatic NSCLC Patients", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2028-12-31", "start_date": "2023-10-26", "completion_date": "2029-12-31", "conditions": ["Non-Small Cell Lung Cancer"], "interventions": ["Ivonescimab Injection", "Pembrolizumab Injection"], "lead_sponsor": "Summit Therapeutics", "collaborators": [], "enrollment": 1600, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT05899608", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2029-05-01", "months_from_now": 34, "imminent": false, "readout_note": "约 34 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06767514", "title": "Clinical Study of Ivonescimab for First-line Treatment of Metastatic NSCLC Patients With High PD-L1", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2028-04", "start_date": "2025-02-27", "completion_date": "2029-06", "conditions": ["Non-Small Cell Lung Cancer"], "interventions": ["Ivonescimab Injection", "Pembrolizumab Injection"], "lead_sponsor": "Summit Therapeutics", "collaborators": [], "enrollment": 780, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06767514", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2028-09-01", "months_from_now": 26, "imminent": false, "readout_note": "约 26 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06951646", "title": "ctDNA-MRD Guided Escalation of Ivonescimab and Docetaxel in Advanced NSCLC With Long-Term Responses to First-line Immunotherapy (CR1STAL-Adaptive)", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-07-01", "start_date": "2026-03-10", "completion_date": "2030-06-01", "conditions": ["Non Small Cell Lung Cancer", "Immune Checkpoint Inhibitors (ICIs)"], "interventions": ["Ivonescimab", "Docetaxel", "Standard Treatment group"], "lead_sponsor": "Second Xiangya Hospital of Central South University", "collaborators": [], "enrollment": 70, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06951646", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2028-12-01", "months_from_now": 29, "imminent": false, "readout_note": "约 29 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07009925", "title": "Phase II Study of Platinum (Cisplatin/Carboplatin)and Polymeric Micelles Paclitaxel(Pm-Pac) With Ivonescimab in First Line Metastatic Squamous NSCLC.", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-05", "start_date": "2025-06", "completion_date": "2028-05", "conditions": ["Squamous Cell Lung Cancer"], "interventions": ["Ivonescimab 20mg/kg intravenous every 3 weeks"], "lead_sponsor": "Jiangsu Cancer Institute & Hospital", "collaborators": [], "enrollment": 38, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07009925", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2027-10-01", "months_from_now": 15, "imminent": false, "readout_note": "约 15 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06936644", "title": "A Multicenter, Single-arm Phase II Study to Evaluate the Efficacy and Safety of Fulzerasib (IBI351) in Combination With Ivonescimab (AK-112) in First-line Treatment of Advanced or Metastatic Non-small Cell Lung Cancer Patients With KRAS G12C Mutation", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-04-30", "start_date": "2025-04-30", "completion_date": "2028-03-30", "conditions": ["KRAS G12C Lung Cancer"], "interventions": ["IBI351+AK112"], "lead_sponsor": "Shanghai Chest Hospital", "collaborators": [], "enrollment": 39, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06936644", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2027-09-01", "months_from_now": 14, "imminent": false, "readout_note": "约 14 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07696832", "title": "Efficacy and Safety of Ivonescimab Monotherapy as First-Line Treatment for PD-L1-Positive, Driver Gene-Negative, Locally Advanced or Metastatic NSCLC: A Multicenter, Prospective, Real-World Cohort Study", "status": "RECRUITING", "phase": "NA", "primary_completion_date": "2027-05-15", "start_date": "2026-01-20", "completion_date": "2027-06-30", "conditions": ["Patients Must Have Histologically or Cytologically Confirmed Locally Advanced or Metastatic NSCLC", "EGFR Mutation-negative and ALK Rearrangement-negative", "Eastern Cooperative Oncology Group Performance Status (ECOG PS) Score of 0 to 2", "No Prior Systemic Therapy Received for the Advanced or Metastatic Disease", "PD-L1 Positive, as Determined by a Validated Assay"], "interventions": ["Ivonescimab Injection"], "lead_sponsor": "Guangdong Association of Clinical Trials", "collaborators": [], "enrollment": 265, "study_type": "OBSERVATIONAL", "url": "https://clinicaltrials.gov/study/NCT07696832", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2027-10-01", "months_from_now": 15, "imminent": false, "readout_note": "约 15 个月后读出", "threat_score": 0.0, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 0, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["NA", "PHASE2", "PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "同靶点直接竞品；NSCLC多项III期", "originator": "Akeso", "current_rights_holders": "Akeso / Summit Therapeutics", "rights_scope": "Akeso: Summit许可区域以外；Summit: 美国、加拿大、欧洲、日本、拉丁美洲、中东和非洲", "ownership_basis": "Summit官方合作页面明确列示AK112/SMT112名称及区域权利划分", "ownership_source": "https://smmttx.com/ivonescimab-smt112/akeso-partnership/default.aspx", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 6, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT05899608": {"published": false, "match_type": "none", "pmids": []}, "NCT06767514": {"published": false, "match_type": "none", "pmids": []}, "NCT06951646": {"published": false, "match_type": "none", "pmids": []}, "NCT07009925": {"published": false, "match_type": "none", "pmids": []}, "NCT06936644": {"published": false, "match_type": "none", "pmids": []}, "NCT07696832": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2027-09-01", "published_any": false, "pubmed_links": []}, {"key": "Pumitamig (BNT327/PM8002/BMS-986545)", "competitor": "Pumitamig (BNT327/PM8002/BMS-986545)", "company": "BioNTech / Bristol Myers Squibb", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07361510", "title": "A Study to Evaluate the Efficacy of Pumitamig Versus Pembrolizumab in Participants With Previously Untreated Advanced Non-Small Cell Lung Cancer and PD-L1 ≥ 50%. (ROSETTA Lung-202)", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2031-10-14", "start_date": "2026-03-12", "completion_date": "2031-10-14", "conditions": ["Non-Small Cell Lung Cancer (NSCLC)"], "interventions": ["Pumitamig", "Pembrolizumab"], "lead_sponsor": "Bristol-Myers Squibb", "collaborators": [], "enrollment": 750, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07361510", "fetched_at": "2026-07-15T14:36:25+00:00", "estimated_readout": "2032-03-01", "months_from_now": 68, "imminent": false, "readout_note": "约 68 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06841055", "title": "Safety and Preliminary Efficacy of Pumitamig (BNT327), an Investigational Therapy for Patients With Non-small Cell Lung Cancer in Combination With Chemotherapy as First-line or Second-line Treatment", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-10", "start_date": "2025-03-03", "completion_date": "2028-10", "conditions": ["Non-small Cell Lung Cancer"], "interventions": ["Pumitamig", "Docetaxel"], "lead_sponsor": "BioNTech SE", "collaborators": [], "enrollment": 60, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06841055", "fetched_at": "2026-07-15T14:36:25+00:00", "estimated_readout": "2029-03-01", "months_from_now": 32, "imminent": false, "readout_note": "约 32 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07680764", "title": "A Study To Assess the Safety, Tolerability, and Efficacy of Imzokitug in Combination With Pumitamig and Platinum-Doublet Chemotherapy (PDCT) Versus Pumitamig and PDCT as First-line Treatment for Participants With Locally Advanced or Metastatic Non-Small Cell Lung Cancer (NSCLC)", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-09-15", "start_date": "2026-08-15", "completion_date": "2030-09-15", "conditions": ["Locally Advanced Non-Small Cell Lung Cancer (NSCLC)", "Metastatic Non-Small Cell Lung Cancer (NSCLC)"], "interventions": ["Pumitamig", "Imzokitug"], "lead_sponsor": "Bristol-Myers Squibb", "collaborators": [], "enrollment": 160, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07680764", "fetched_at": "2026-07-15T14:36:25+00:00", "estimated_readout": "2029-02-01", "months_from_now": 31, "imminent": false, "readout_note": "约 31 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE2", "PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1/VEGF-A双抗；NSCLC多项III期", "originator": "Biotheus", "current_rights_holders": "BioNTech / Bristol Myers Squibb", "rights_scope": "Global", "ownership_basis": "德国BioNTech收购Biotheus取得全球权利后与BMS全球共同开发及商业化", "ownership_source": "https://www.biontech.com/us/en/home/mediaroom/news/press-releases/2025/06/biontech-and-bristol-myers-squibb-announce-global-strategic.html|https://www.biontech.com/content/dam/biontech-corporate/global/pdf/home/about/assets/BNTX-Annual-Report-2024.pdf", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 3, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07361510": {"published": false, "match_type": "none", "pmids": []}, "NCT06841055": {"published": false, "match_type": "none", "pmids": []}, "NCT07680764": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2029-02-01", "published_any": false, "pubmed_links": []}, {"key": "HB0025", "competitor": "HB0025", "company": "Shanghai Huaota / Huabo Biopharm", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07383116", "title": "Phase III Clinical Study of HB0025 Combined With Chemotherapy Versus Tislelizumab Combined With Chemotherapy as First-Line Treatment for Advanced Nonsquamous Non-Small Cell Lung Cancer", "status": "NOT_YET_RECRUITING", "phase": "PHASE3", "primary_completion_date": "2028-04-10", "start_date": "2026-01-15", "completion_date": "2028-04-10", "conditions": ["Non Squamous Non-small Cell Lung Cancer"], "interventions": ["Pemetrexed injection", "Carboplatin Injection", "Cisplatin injection", "HB0025 Injection", "Tislelizumab"], "lead_sponsor": "Shanghai Huaota Biopharmaceutical Co., Ltd.", "collaborators": [], "enrollment": 500, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07383116", "fetched_at": "2026-07-15T14:36:26+00:00", "estimated_readout": "2028-09-01", "months_from_now": 26, "imminent": false, "readout_note": "约 26 个月后读出", "threat_score": 4.2, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 7, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE3"], "max_threat": 4.2, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1抗体-VEGFR1融合蛋白；一线鳞癌和非鳞癌III期", "originator": "Huabo Biopharm / Shanghai Huaota", "current_rights_holders": "Shanghai Huaota / Huabo Biopharm", "rights_scope": "Global", "ownership_basis": "华博为华奥泰子公司且公司官网明确HB0025由集团研发", "ownership_source": "https://www.huabobio.com/en/about.html|https://www.huaota.com/en/newsshow/15.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07383116": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 4.2, "quadrant": "后期平庸", "next_readout": "2028-09-01", "published_any": false, "pubmed_links": []}, {"key": "IMM2510", "competitor": "IMM2510", "company": "ImmuneOnco Biopharmaceuticals", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06746870", "title": "A Phase II Clinical Study to Evaluate the Safety, Pharmacokinetic Profile, and Preliminary Efficacy of IMM2510 in Combination with Chemotherapy As First-line Treatment in Subjects with Non-small Cell Lung Cancer or Triple-negative Breast Cancer", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2025-11", "start_date": "2024-12", "completion_date": "2026-12", "conditions": ["NSCLC", "TNBC"], "interventions": ["IMM2510", "Chemotherapy (pemetrexed + cisplatin/carboplatin)", "Chemotherapy (paclitaxel + cisplatin/carboplatin)", "Chemotherapy(Nab-paclitaxel)"], "lead_sponsor": "ImmuneOnco Biopharmaceuticals (Shanghai) Inc.", "collaborators": [], "enrollment": 148, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06746870", "fetched_at": "2026-07-15T14:36:27+00:00", "estimated_readout": "2026-04-01", "months_from_now": -3, "imminent": false, "readout_note": "已读出 (PCD 已过)", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE2"], "max_threat": 2.4, "in_watchlist": true, "new_entrant": false, "watch_priority": "medium", "note": "PD-L1/VEGF双抗；一线NSCLC II期", "originator": "ImmuneOnco Biopharmaceuticals", "current_rights_holders": "ImmuneOnco Biopharmaceuticals", "rights_scope": "Global", "ownership_basis": "2026年1月原境外许可终止后境外权利回归宜明昂科", "ownership_source": "https://cn.immuneonco.com/news/gsdynamics/594.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT06746870": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 4, "quad_y": 2.4, "quadrant": "后期平庸", "next_readout": "2026-04-01", "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 4, "new_entrants": 0, "watchlist": 4, "published": 0}, "scenario_competitors": [{"indication": "晚期NSCLC一线", "competitor": "Pembrolizumab + platinum chemotherapy", "company": "Merck", "competitor_type": "标准治疗基准", "mechanism": "PD-1 + chemotherapy", "stage": "III期/标准治疗", "role": "一线免疫化疗基准", "source_url": "https://clinicaltrials.gov/study/NCT02578680", "guideline_status": "指南推荐", "guideline_scope": "驱动阴性晚期/转移性NSCLC；具体方案取决于组织学与PD-L1", "guideline_source_url": "https://ascopubs.org/guidelines/therapy-stage-iv-non-small-cell-lung-cancer-without-driver-alterations", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "晚期NSCLC一线", "competitor": "Nivolumab + ipilimumab + chemotherapy", "company": "Bristol Myers Squibb", "competitor_type": "标准治疗基准", "mechanism": "PD-1 + CTLA-4 + chemotherapy", "stage": "III期/标准治疗", "role": "一线双免疫基准", "source_url": "https://clinicaltrials.gov/study/NCT03215706", "guideline_status": "指南可选", "guideline_scope": "驱动阴性且一般状况良好；ASCO为条件性/较弱推荐", "guideline_source_url": "https://ascopubs.org/doi/abs/10.1200/JCO-25-02825", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "晚期NSCLC一线", "competitor": "Atezolizumab + bevacizumab + chemotherapy", "company": "Roche", "competitor_type": "功能性竞争方案", "mechanism": "PD-L1 + VEGF + chemotherapy", "stage": "III期/标准治疗", "role": "与双功能机制最接近的组合方案", "source_url": "https://clinicaltrials.gov/study/NCT02366143", "guideline_status": "指南可选", "guideline_scope": "非鳞NSCLC且无贝伐珠单抗禁忌；不是所有NSCLC通用基准", "guideline_source_url": "https://ascopubs.org/doi/10.1200/JCO-25-01062", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}]}, {"our_product": "JS207", "our_product_ownership": {"asset": "JS207", "originator": "Shanghai Junshi Biosciences", "current_rights_holders": "Shanghai Junshi Biosciences", "rights_scope": "Global", "ownership_basis": "君实生物年度报告明确列为公司自主研发资产", "ownership_source": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0427/2026042701561.pdf", "ownership_confidence": "high", "last_verified": "2026-07-15"}, "indication": "驱动基因阳性TKI失败NSCLC", "our_phase": "PHASE2", "our_metrics": {"trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06868836", "title": "Phase II Clinical Study of JS207 (PD-1/VEGF Bispecific Antibody) Combination Therapies in Patients With Driver Gene-Positive, Advanced Non-Small Cell Lung Cancer After Failure of TKI Therapy", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2026-09-04", "start_date": "2025-03-30", "completion_date": "2028-04-04", "conditions": ["Non-squamous Non-small Cell Lung Cancer"], "interventions": ["JS207", "Pemetrexed", "Carboplatin or cisplatin", "JS212"], "lead_sponsor": "Shanghai Junshi Bioscience Co., Ltd.", "collaborators": [], "enrollment": 78, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06868836", "fetched_at": "2026-07-15T14:36:22+00:00", "estimated_readout": "2027-02-01", "months_from_now": 7, "imminent": true, "readout_note": "未来 7 个月内读出 (重点监测)", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0}], "trial_count": 1, "phases": ["PHASE2"], "registered_phase": "PHASE2", "internal_phase": "PHASE2", "effective_phase": "PHASE2", "effective_status": "RECRUITING", "progress_score": 4, "competitive_score": 4.0, "score_source": "公开注册试验", "quadrant": "后期平庸", "next_readout": "2027-02-01"}, "line": "2L+", "mechanism": "PD-1/VEGF bispecific", "competitors": [{"key": "Ivonescimab (AK112/SMT112)", "competitor": "Ivonescimab (AK112/SMT112)", "company": "Akeso / Summit Therapeutics", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07669051", "title": "A Phase II Clinical Trial of Ivonescimab Plus Third-generation EGFR-TKIs in Advanced Non-small Cell Lung Cancer With Gradual or Potential Progression After EGFR-TKIs Treatment", "status": "ACTIVE_NOT_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-01-01", "start_date": "2026-01-01", "completion_date": "2029-01-01", "conditions": ["NSCLC (Advanced Non-small Cell Lung Cancer)"], "interventions": ["ivonescimab plus EGFR-TKI."], "lead_sponsor": "Shandong Cancer Hospital and Institute", "collaborators": [], "enrollment": 36, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07669051", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2028-06-01", "months_from_now": 23, "imminent": false, "readout_note": "约 23 个月后读出", "threat_score": 4.8, "threat_tier": "Tier 2", "threat_label": "中高", "threat_color": "#e67e22", "matrix_x": 4, "matrix_y": 6.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07489703", "title": "SHR-A1811 + AK112 in HER2-Altered Advanced/Metastatic NSCLC", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-12-31", "start_date": "2026-04-30", "completion_date": "2028-12-31", "conditions": ["Non-Small Cell Lung Cancer"], "interventions": ["SHR-A1811 plus AK112"], "lead_sponsor": "Sun Yat-sen University", "collaborators": [], "enrollment": 30, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07489703", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2028-05-01", "months_from_now": 22, "imminent": false, "readout_note": "约 22 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06936644", "title": "A Multicenter, Single-arm Phase II Study to Evaluate the Efficacy and Safety of Fulzerasib (IBI351) in Combination With Ivonescimab (AK-112) in First-line Treatment of Advanced or Metastatic Non-small Cell Lung Cancer Patients With KRAS G12C Mutation", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2027-04-30", "start_date": "2025-04-30", "completion_date": "2028-03-30", "conditions": ["KRAS G12C Lung Cancer"], "interventions": ["IBI351+AK112"], "lead_sponsor": "Shanghai Chest Hospital", "collaborators": [], "enrollment": 39, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06936644", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2027-09-01", "months_from_now": 14, "imminent": false, "readout_note": "约 14 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07696832", "title": "Efficacy and Safety of Ivonescimab Monotherapy as First-Line Treatment for PD-L1-Positive, Driver Gene-Negative, Locally Advanced or Metastatic NSCLC: A Multicenter, Prospective, Real-World Cohort Study", "status": "RECRUITING", "phase": "NA", "primary_completion_date": "2027-05-15", "start_date": "2026-01-20", "completion_date": "2027-06-30", "conditions": ["Patients Must Have Histologically or Cytologically Confirmed Locally Advanced or Metastatic NSCLC", "EGFR Mutation-negative and ALK Rearrangement-negative", "Eastern Cooperative Oncology Group Performance Status (ECOG PS) Score of 0 to 2", "No Prior Systemic Therapy Received for the Advanced or Metastatic Disease", "PD-L1 Positive, as Determined by a Validated Assay"], "interventions": ["Ivonescimab Injection"], "lead_sponsor": "Guangdong Association of Clinical Trials", "collaborators": [], "enrollment": 265, "study_type": "OBSERVATIONAL", "url": "https://clinicaltrials.gov/study/NCT07696832", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2027-10-01", "months_from_now": 15, "imminent": false, "readout_note": "约 15 个月后读出", "threat_score": 0.0, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 0, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["NA", "PHASE2"], "max_threat": 4.8, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "同靶点直接竞品；NSCLC多项III期", "originator": "Akeso", "current_rights_holders": "Akeso / Summit Therapeutics", "rights_scope": "Akeso: Summit许可区域以外；Summit: 美国、加拿大、欧洲、日本、拉丁美洲、中东和非洲", "ownership_basis": "Summit官方合作页面明确列示AK112/SMT112名称及区域权利划分", "ownership_source": "https://smmttx.com/ivonescimab-smt112/akeso-partnership/default.aspx", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 4, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07669051": {"published": false, "match_type": "none", "pmids": []}, "NCT07489703": {"published": false, "match_type": "none", "pmids": []}, "NCT06936644": {"published": false, "match_type": "none", "pmids": []}, "NCT07696832": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 4, "quad_y": 4.8, "quadrant": "领先威胁", "next_readout": "2027-09-01", "published_any": false, "pubmed_links": []}, {"key": "Pumitamig (BNT327/PM8002/BMS-986545)", "competitor": "Pumitamig (BNT327/PM8002/BMS-986545)", "company": "BioNTech / Bristol Myers Squibb", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1/VEGF-A双抗；NSCLC多项III期", "originator": "Biotheus", "current_rights_holders": "BioNTech / Bristol Myers Squibb", "rights_scope": "Global", "ownership_basis": "德国BioNTech收购Biotheus取得全球权利后与BMS全球共同开发及商业化", "ownership_source": "https://www.biontech.com/us/en/home/mediaroom/news/press-releases/2025/06/biontech-and-bristol-myers-squibb-announce-global-strategic.html|https://www.biontech.com/content/dam/biontech-corporate/global/pdf/home/about/assets/BNTX-Annual-Report-2024.pdf", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}, {"key": "HB0025", "competitor": "HB0025", "company": "Shanghai Huaota / Huabo Biopharm", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1抗体-VEGFR1融合蛋白；一线鳞癌和非鳞癌III期", "originator": "Huabo Biopharm / Shanghai Huaota", "current_rights_holders": "Shanghai Huaota / Huabo Biopharm", "rights_scope": "Global", "ownership_basis": "华博为华奥泰子公司且公司官网明确HB0025由集团研发", "ownership_source": "https://www.huabobio.com/en/about.html|https://www.huaota.com/en/newsshow/15.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}, {"key": "IMM2510", "competitor": "IMM2510", "company": "ImmuneOnco Biopharmaceuticals", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "medium", "note": "PD-L1/VEGF双抗；一线NSCLC II期", "originator": "ImmuneOnco Biopharmaceuticals", "current_rights_holders": "ImmuneOnco Biopharmaceuticals", "rights_scope": "Global", "ownership_basis": "2026年1月原境外许可终止后境外权利回归宜明昂科", "ownership_source": "https://cn.immuneonco.com/news/gsdynamics/594.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 4, "new_entrants": 0, "watchlist": 4, "published": 0}, "scenario_competitors": [{"indication": "驱动基因阳性TKI失败NSCLC", "competitor": "Amivantamab + carboplatin + pemetrexed", "company": "Janssen", "competitor_type": "标准治疗基准", "mechanism": "EGFR/MET bispecific + chemotherapy", "stage": "III期/标准治疗", "role": "EGFR突变奥希替尼后基准", "source_url": "https://clinicaltrials.gov/study/NCT04988295", "guideline_status": "指南推荐", "guideline_scope": "EGFR exon19del/L858R且奥希替尼后进展；需按耐药机制进一步分层", "guideline_source_url": "https://ascopubs.org/doi/10.1200/JCO-26-00843", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "驱动基因阳性TKI失败NSCLC", "competitor": "Sintilimab + bevacizumab biosimilar + chemotherapy", "company": "Innovent", "competitor_type": "功能性竞争方案", "mechanism": "PD-1 + VEGF + chemotherapy", "stage": "III期", "role": "同免疫抗血管生成策略", "source_url": "https://clinicaltrials.gov/study/NCT03802240", "guideline_status": "区域性证据/非普适指南标准", "guideline_scope": "ASCO 2026不推荐EGFR-TKI进展后PD-(L)1±含铂化疗；含VEGF免疫组合仍属探索", "guideline_source_url": "https://ascopubs.org/doi/10.1200/JCO-26-00843", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "驱动基因阳性TKI失败NSCLC", "competitor": "Platinum + pemetrexed chemotherapy", "company": "多家公司", "competitor_type": "标准治疗基准", "mechanism": "Chemotherapy", "stage": "标准治疗", "role": "含铂双药对照基准", "source_url": "https://clinicaltrials.gov/study/NCT03515837", "guideline_status": "指南可选", "guideline_scope": "EGFR-TKI后；不适合amivantamab时可考虑，需结合耐药机制", "guideline_source_url": "https://ascopubs.org/doi/10.1200/JCO-26-00843", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}]}, {"our_product": "JS207", "our_product_ownership": {"asset": "JS207", "originator": "Shanghai Junshi Biosciences", "current_rights_holders": "Shanghai Junshi Biosciences", "rights_scope": "Global", "ownership_basis": "君实生物年度报告明确列为公司自主研发资产", "ownership_source": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0427/2026042701561.pdf", "ownership_confidence": "high", "last_verified": "2026-07-15"}, "indication": "免疫联合含铂化疗后进展NSCLC", "our_phase": "PHASE2", "our_metrics": {"trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06924606", "title": "Evaluating the Preliminary Efficacy and Safety of JS207 in NSCLC After Progression Following Platinum-based Chemotherapy and Immunotherapy", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2026-06-26", "start_date": "2025-07-15", "completion_date": "2026-06-26", "conditions": ["Advanced NSCLC"], "interventions": ["JS207 injection +docetaxel", "JS207 injection +JS004 injection", "JS207 injection"], "lead_sponsor": "Shanghai Junshi Bioscience Co., Ltd.", "collaborators": [], "enrollment": 66, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06924606", "fetched_at": "2026-07-15T14:36:22+00:00", "estimated_readout": "2026-11-01", "months_from_now": 4, "imminent": true, "readout_note": "未来 4 个月内读出 (重点监测)", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0}], "trial_count": 1, "phases": ["PHASE2"], "registered_phase": "PHASE2", "internal_phase": "PHASE2", "effective_phase": "PHASE2", "effective_status": "RECRUITING", "progress_score": 4, "competitive_score": 4.0, "score_source": "公开注册试验", "quadrant": "后期平庸", "next_readout": "2026-11-01"}, "line": "2L+", "mechanism": "PD-1/VEGF bispecific", "competitors": [{"key": "Ivonescimab (AK112/SMT112)", "competitor": "Ivonescimab (AK112/SMT112)", "company": "Akeso / Summit Therapeutics", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06478043", "title": "A Study to Investigate the Efficacy and Safety of Ivonescimab Combined With Irinotecan Liposome as Second-line Regimen for SCLC", "status": "COMPLETED", "phase": "PHASE2", "primary_completion_date": "2024-10-22", "start_date": "2024-10-16", "completion_date": "2025-08-27", "conditions": ["Extensive-stage Small-cell Lung Cancer"], "interventions": ["ivonescimab", "irinotecan liposome"], "lead_sponsor": "Zhejiang Cancer Hospital", "collaborators": [], "enrollment": 60, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06478043", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2025-03-01", "months_from_now": -16, "imminent": false, "readout_note": "已读出 (PCD 已过)", "threat_score": 5.2, "threat_tier": "Tier 2", "threat_label": "中高", "threat_color": "#e67e22", "matrix_x": 4, "matrix_y": 6.5, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06951646", "title": "ctDNA-MRD Guided Escalation of Ivonescimab and Docetaxel in Advanced NSCLC With Long-Term Responses to First-line Immunotherapy (CR1STAL-Adaptive)", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-07-01", "start_date": "2026-03-10", "completion_date": "2030-06-01", "conditions": ["Non Small Cell Lung Cancer", "Immune Checkpoint Inhibitors (ICIs)"], "interventions": ["Ivonescimab", "Docetaxel", "Standard Treatment group"], "lead_sponsor": "Second Xiangya Hospital of Central South University", "collaborators": [], "enrollment": 70, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06951646", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2028-12-01", "months_from_now": 29, "imminent": false, "readout_note": "约 29 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07412262", "title": "A Study of Chidamide Combined With Ivonescimab in the Treatment of Advanced Non-Small Cell Lung Cancer (NSCLC) With Acquired Resistance to Immunotherapy and High Yes-associated Protein (YAP) Expression", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-03-31", "start_date": "2026-05-15", "completion_date": "2029-03-31", "conditions": ["Non-Small Cell Lung Cancer"], "interventions": ["Chidamide in combination with Ivonescimab"], "lead_sponsor": "Guangdong Association of Clinical Trials", "collaborators": [], "enrollment": 32, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07412262", "fetched_at": "2026-07-15T14:36:23+00:00", "estimated_readout": "2028-08-01", "months_from_now": 25, "imminent": false, "readout_note": "约 25 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT06820762", "title": "Irinotecan Liposome(II) Combined With Ivonescimab as Second-line Treatment for Small Cell Lung Cancer : A Prospective, Single-arm, Multicenter Clinical Study", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2026-12-31", "start_date": "2025-02-28", "completion_date": "2027-12-31", "conditions": ["SCLC"], "interventions": ["irinotecan liposome(II) plus Ivonescimab via intravenously (IV) Q3W for 4-6 cycles, followed by Ivonescimab until disease progression or intolerable toxicity"], "lead_sponsor": "The Second Affiliated Hospital of Dalian Medical University", "collaborators": [], "enrollment": 40, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06820762", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2027-05-01", "months_from_now": 10, "imminent": true, "readout_note": "未来 10 个月内读出 (重点监测)", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}, {"source": "ClinicalTrials.gov", "nct_id": "NCT07158489", "title": "Overcoming Resistance to Immunotherapy Combining Gemcitabine With Ivonescimab in Advanced NSCLC", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-07", "start_date": "2026-07", "completion_date": "2029-07-31", "conditions": ["NSCLC", "NSCLC (Advanced Non-small Cell Lung Cancer)"], "interventions": ["Gemcitabine + Ivonescimab"], "lead_sponsor": "Swiss Cancer Institute", "collaborators": [], "enrollment": 47, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07158489", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2028-12-01", "months_from_now": 29, "imminent": false, "readout_note": "约 29 个月后读出", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE2"], "max_threat": 5.2, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "同靶点直接竞品；NSCLC多项III期", "originator": "Akeso", "current_rights_holders": "Akeso / Summit Therapeutics", "rights_scope": "Akeso: Summit许可区域以外；Summit: 美国、加拿大、欧洲、日本、拉丁美洲、中东和非洲", "ownership_basis": "Summit官方合作页面明确列示AK112/SMT112名称及区域权利划分", "ownership_source": "https://smmttx.com/ivonescimab-smt112/akeso-partnership/default.aspx", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 5, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT06478043": {"published": false, "match_type": "none", "pmids": []}, "NCT06951646": {"published": false, "match_type": "none", "pmids": []}, "NCT07412262": {"published": false, "match_type": "none", "pmids": []}, "NCT06820762": {"published": false, "match_type": "none", "pmids": []}, "NCT07158489": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 4, "quad_y": 5.2, "quadrant": "领先威胁", "next_readout": "2025-03-01", "published_any": false, "pubmed_links": []}, {"key": "Pumitamig (BNT327/PM8002/BMS-986545)", "competitor": "Pumitamig (BNT327/PM8002/BMS-986545)", "company": "BioNTech / Bristol Myers Squibb", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06841055", "title": "Safety and Preliminary Efficacy of Pumitamig (BNT327), an Investigational Therapy for Patients With Non-small Cell Lung Cancer in Combination With Chemotherapy as First-line or Second-line Treatment", "status": "RECRUITING", "phase": "PHASE2", "primary_completion_date": "2028-10", "start_date": "2025-03-03", "completion_date": "2028-10", "conditions": ["Non-small Cell Lung Cancer"], "interventions": ["Pumitamig", "Docetaxel"], "lead_sponsor": "BioNTech SE", "collaborators": [], "enrollment": 60, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06841055", "fetched_at": "2026-07-15T14:36:25+00:00", "estimated_readout": "2029-03-01", "months_from_now": 32, "imminent": false, "readout_note": "约 32 个月后读出", "threat_score": 4.0, "threat_tier": "Tier 3", "threat_label": "中", "threat_color": "#f1c40f", "matrix_x": 4, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE2"], "max_threat": 4.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1/VEGF-A双抗；NSCLC多项III期", "originator": "Biotheus", "current_rights_holders": "BioNTech / Bristol Myers Squibb", "rights_scope": "Global", "ownership_basis": "德国BioNTech收购Biotheus取得全球权利后与BMS全球共同开发及商业化", "ownership_source": "https://www.biontech.com/us/en/home/mediaroom/news/press-releases/2025/06/biontech-and-bristol-myers-squibb-announce-global-strategic.html|https://www.biontech.com/content/dam/biontech-corporate/global/pdf/home/about/assets/BNTX-Annual-Report-2024.pdf", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT06841055": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 4, "quad_y": 4.0, "quadrant": "后期平庸", "next_readout": "2029-03-01", "published_any": false, "pubmed_links": []}, {"key": "HB0025", "competitor": "HB0025", "company": "Shanghai Huaota / Huabo Biopharm", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1抗体-VEGFR1融合蛋白；一线鳞癌和非鳞癌III期", "originator": "Huabo Biopharm / Shanghai Huaota", "current_rights_holders": "Shanghai Huaota / Huabo Biopharm", "rights_scope": "Global", "ownership_basis": "华博为华奥泰子公司且公司官网明确HB0025由集团研发", "ownership_source": "https://www.huabobio.com/en/about.html|https://www.huaota.com/en/newsshow/15.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}, {"key": "IMM2510", "competitor": "IMM2510", "company": "ImmuneOnco Biopharmaceuticals", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "medium", "note": "PD-L1/VEGF双抗；一线NSCLC II期", "originator": "ImmuneOnco Biopharmaceuticals", "current_rights_holders": "ImmuneOnco Biopharmaceuticals", "rights_scope": "Global", "ownership_basis": "2026年1月原境外许可终止后境外权利回归宜明昂科", "ownership_source": "https://cn.immuneonco.com/news/gsdynamics/594.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 4, "new_entrants": 0, "watchlist": 4, "published": 0}, "scenario_competitors": [{"indication": "免疫联合含铂化疗后进展NSCLC", "competitor": "Docetaxel + ramucirumab", "company": "Eli Lilly", "competitor_type": "标准治疗基准", "mechanism": "Chemotherapy + VEGFR2", "stage": "II期/常用方案", "role": "免疫治疗后抗血管生成化疗基准", "source_url": "https://clinicaltrials.gov/study/NCT03971474", "guideline_status": "指南推荐", "guideline_scope": "既往接受含铂化疗和免疫检查点抑制剂后；证据质量较低但推荐强", "guideline_source_url": "https://ascopubs.org/doi/abs/10.1200/JCO-25-02825", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "免疫联合含铂化疗后进展NSCLC", "competitor": "QL1706 + bevacizumab ± chemotherapy", "company": "Qilu Pharmaceutical", "competitor_type": "功能性竞争方案", "mechanism": "PD-1/CTLA-4 + VEGF", "stage": "II期", "role": "免疫后进展的双免疫抗血管生成方案", "source_url": "https://clinicaltrials.gov/study/NCT07134413", "guideline_status": "探索性临床方案", "guideline_scope": "当前仅作为在研方案竞争者；不是公开指南标准治疗", "guideline_source_url": "https://clinicaltrials.gov/study/NCT07134413", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "免疫联合含铂化疗后进展NSCLC", "competitor": "Docetaxel", "company": "多家公司", "competitor_type": "标准治疗基准", "mechanism": "Chemotherapy", "stage": "标准治疗", "role": "二线化疗基准", "source_url": "https://clinicaltrials.gov/study/NCT03971474", "guideline_status": "指南推荐", "guideline_scope": "既往接受含铂化疗和免疫检查点抑制剂后", "guideline_source_url": "https://ascopubs.org/doi/abs/10.1200/JCO-25-02825", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}]}, {"our_product": "JS207", "our_product_ownership": {"asset": "JS207", "originator": "Shanghai Junshi Biosciences", "current_rights_holders": "Shanghai Junshi Biosciences", "rights_scope": "Global", "ownership_basis": "君实生物年度报告明确列为公司自主研发资产", "ownership_source": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0427/2026042701561.pdf", "ownership_confidence": "high", "last_verified": "2026-07-15"}, "indication": "II-III期NSCLC", "our_phase": "PHASE2", "our_metrics": {"trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT06944470", "title": "JS207 Combined With Chemotherapy in Subjects With Stage II-III NSCLC", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2026-09-30", "start_date": "2025-04-20", "completion_date": "2027-12-31", "conditions": ["NSCLC"], "interventions": ["Paclitaxel + Carboplatin/cisplatin for squamous cell carcinoma and pemetrexed + carboplatin/cisplatin for non-squamous cell carcinoma", "surgery", "Radiochemotherapy", "JS207"], "lead_sponsor": "Shanghai Junshi Bioscience Co., Ltd.", "collaborators": [], "enrollment": 76, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT06944470", "fetched_at": "2026-07-15T14:36:22+00:00", "estimated_readout": "2027-02-01", "months_from_now": 7, "imminent": true, "readout_note": "未来 7 个月内读出 (重点监测)", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0}], "trial_count": 1, "phases": ["PHASE2"], "registered_phase": "PHASE2", "internal_phase": "PHASE2", "effective_phase": "PHASE2", "effective_status": "NOT_YET_RECRUITING", "progress_score": 4, "competitive_score": 2.4, "score_source": "公开注册试验", "quadrant": "后期平庸", "next_readout": "2027-02-01"}, "line": "围手术期", "mechanism": "PD-1/VEGF bispecific", "competitors": [{"key": "Pumitamig (BNT327/PM8002/BMS-986545)", "competitor": "Pumitamig (BNT327/PM8002/BMS-986545)", "company": "BioNTech / Bristol Myers Squibb", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07361497", "title": "A Study to Evaluate Pumitamig Versus Durvalumab Following Concurrent Chemoradiation Therapy in Participants With Unresectable Stage III Non-small Cell Lung Cancer (NSCLC) (ROSETTA Lung-201)", "status": "RECRUITING", "phase": "PHASE3", "primary_completion_date": "2030-09-18", "start_date": "2026-03-16", "completion_date": "2033-12-31", "conditions": ["Non-small Cell Lung Cancer (NSCLC)"], "interventions": ["Pumitamig", "Durvalumab"], "lead_sponsor": "Bristol-Myers Squibb", "collaborators": [], "enrollment": 850, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07361497", "fetched_at": "2026-07-15T14:36:25+00:00", "estimated_readout": "2031-02-01", "months_from_now": 55, "imminent": false, "readout_note": "约 55 个月后读出", "threat_score": 7.0, "threat_tier": "Tier 1", "threat_label": "高", "threat_color": "#e74c3c", "matrix_x": 7, "matrix_y": 5.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE3"], "max_threat": 7.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1/VEGF-A双抗；NSCLC多项III期", "originator": "Biotheus", "current_rights_holders": "BioNTech / Bristol Myers Squibb", "rights_scope": "Global", "ownership_basis": "德国BioNTech收购Biotheus取得全球权利后与BMS全球共同开发及商业化", "ownership_source": "https://www.biontech.com/us/en/home/mediaroom/news/press-releases/2025/06/biontech-and-bristol-myers-squibb-announce-global-strategic.html|https://www.biontech.com/content/dam/biontech-corporate/global/pdf/home/about/assets/BNTX-Annual-Report-2024.pdf", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07361497": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 7, "quad_y": 7.0, "quadrant": "领先威胁", "next_readout": "2031-02-01", "published_any": false, "pubmed_links": []}, {"key": "Ivonescimab (AK112/SMT112)", "competitor": "Ivonescimab (AK112/SMT112)", "company": "Akeso / Summit Therapeutics", "trials": [{"source": "ClinicalTrials.gov", "nct_id": "NCT07086326", "title": "A Phase II Randomized Trial of Neoadjuvant Ivonescimab or Penpulimab Plus Chemotherapy in Resectable NSCLC", "status": "NOT_YET_RECRUITING", "phase": "PHASE2", "primary_completion_date": "2026-12-30", "start_date": "2025-07-31", "completion_date": "2027-12-30", "conditions": ["NSCLC", "Neoadjuvant Therapy", "Immunotherapy", "AK112", "Bispecific Antibody"], "interventions": ["Ivonescimab+Chemo", "Penpulimab+Chemo"], "lead_sponsor": "Yang Fan, MD", "collaborators": [], "enrollment": 164, "study_type": "INTERVENTIONAL", "url": "https://clinicaltrials.gov/study/NCT07086326", "fetched_at": "2026-07-15T14:36:24+00:00", "estimated_readout": "2027-05-01", "months_from_now": 10, "imminent": true, "readout_note": "未来 10 个月内读出 (重点监测)", "threat_score": 2.4, "threat_tier": "Tier 4", "threat_label": "低", "threat_color": "#2ecc71", "matrix_x": 4, "matrix_y": 3.0, "published": false, "pub_match_type": null, "publications": [], "earliest_pub_date": null, "readout_actual": null, "readout_basis": null}], "phases": ["PHASE2"], "max_threat": 2.4, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "同靶点直接竞品；NSCLC多项III期", "originator": "Akeso", "current_rights_holders": "Akeso / Summit Therapeutics", "rights_scope": "Akeso: Summit许可区域以外；Summit: 美国、加拿大、欧洲、日本、拉丁美洲、中东和非洲", "ownership_basis": "Summit官方合作页面明确列示AK112/SMT112名称及区域权利划分", "ownership_source": "https://smmttx.com/ivonescimab-smt112/akeso-partnership/default.aspx", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 1, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {"NCT07086326": {"published": false, "match_type": "none", "pmids": []}}, "quad_x": 4, "quad_y": 2.4, "quadrant": "后期平庸", "next_readout": "2027-05-01", "published_any": false, "pubmed_links": []}, {"key": "HB0025", "competitor": "HB0025", "company": "Shanghai Huaota / Huabo Biopharm", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "high", "note": "PD-L1抗体-VEGFR1融合蛋白；一线鳞癌和非鳞癌III期", "originator": "Huabo Biopharm / Shanghai Huaota", "current_rights_holders": "Shanghai Huaota / Huabo Biopharm", "rights_scope": "Global", "ownership_basis": "华博为华奥泰子公司且公司官网明确HB0025由集团研发", "ownership_source": "https://www.huabobio.com/en/about.html|https://www.huaota.com/en/newsshow/15.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}, {"key": "IMM2510", "competitor": "IMM2510", "company": "ImmuneOnco Biopharmaceuticals", "trials": [], "phases": [], "max_threat": 0.0, "in_watchlist": true, "new_entrant": false, "watch_priority": "medium", "note": "PD-L1/VEGF双抗；一线NSCLC II期", "originator": "ImmuneOnco Biopharmaceuticals", "current_rights_holders": "ImmuneOnco Biopharmaceuticals", "rights_scope": "Global", "ownership_basis": "2026年1月原境外许可终止后境外权利回归宜明昂科", "ownership_source": "https://cn.immuneonco.com/news/gsdynamics/594.html", "ownership_confidence": "high", "ownership_last_verified": "2026-07-15", "trial_count": 0, "evidence": [], "key_efficacy": null, "cde": [], "nct_pubmed_status": {}, "quad_x": 0, "quad_y": 0.0, "quadrant": "早期观察", "next_readout": null, "published_any": false, "pubmed_links": []}], "change_alerts": {"has_baseline": false, "added": [], "changed": [], "earlier_readout": []}, "trends": {"enough": false, "snapshot_count": 0, "note": "趋势数据积累中(需 ≥2 次刷新)"}, "indication_score": null, "counts": {"competitors": 4, "new_entrants": 0, "watchlist": 4, "published": 0}, "scenario_competitors": [{"indication": "II-III期NSCLC", "competitor": "Durvalumab after chemoradiotherapy", "company": "AstraZeneca", "competitor_type": "标准治疗基准", "mechanism": "PD-L1 consolidation", "stage": "III期/标准治疗", "role": "不可切除III期巩固治疗基准", "source_url": "https://clinicaltrials.gov/study/NCT02125461", "guideline_status": "监管批准/标准方案", "guideline_scope": "不可切除III期且同步含铂放化疗后未进展；分子分型需单独考虑", "guideline_source_url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/761069s043lbledt.pdf", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "II-III期NSCLC", "competitor": "Perioperative pembrolizumab + chemotherapy", "company": "Merck", "competitor_type": "标准治疗基准", "mechanism": "PD-1 + chemotherapy", "stage": "III期/标准治疗", "role": "可切除NSCLC围手术期基准", "source_url": "https://clinicaltrials.gov/study/NCT03425643", "guideline_status": "监管批准/指南方案", "guideline_scope": "可切除且肿瘤≥4 cm或淋巴结阳性；需按分期和分子分型限定", "guideline_source_url": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-neoadjuvant-adjuvant-pembrolizumab-resectable-non-small-cell-lung-cancer", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}, {"indication": "II-III期NSCLC", "competitor": "Perioperative nivolumab + chemotherapy", "company": "Bristol Myers Squibb", "competitor_type": "标准治疗基准", "mechanism": "PD-1 + chemotherapy", "stage": "III期/标准治疗", "role": "可切除NSCLC围手术期基准", "source_url": "https://clinicaltrials.gov/study/NCT04025879", "guideline_status": "监管批准/指南方案", "guideline_scope": "可切除且肿瘤≥4 cm和/或淋巴结阳性；无已知EGFR/ALK驱动", "guideline_source_url": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-neoadjuvantadjuvant-nivolumab-resectable-non-small-cell-lung-cancer", "medical_review_status": "待医学信息知识库确认", "knowledge_owner": "医学信息（生产口径）", "as_of_date": "2026-07-15"}]}]}], "total_trials": 23, "total_evidence": 0};
+</script>
+<script>
+// Product-centric competitive landscape — interactions.
+// Selectors (product -> indication) + sort, change-alert area,
+// four-quadrant landscape chart, trend charts, detailed competitor table
+// with in-row trial drill-down.
+
+let _charts = [];
+function destroyCharts(){ _charts.forEach(c=>{try{c.destroy()}catch(e){}}); _charts=[]; }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,
+  c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function currentProduct(){ return document.getElementById('selProduct').value; }
+function currentIndication(){ return document.getElementById('selIndication').value; }
+
+function getView(){
+  const p = MODEL.products.find(x=>x.our_product===currentProduct());
+  if(!p) return null;
+  return p.indications.find(v=>v.indication===currentIndication()) || p.indications[0];
+}
+
+function initSelectors(){
+  const sp = document.getElementById('selProduct');
+  sp.innerHTML = MODEL.products.map(p=>
+    `<option value="${esc(p.our_product)}">${esc(p.our_product)}</option>`).join('');
+  populateIndications();
+}
+function populateIndications(){
+  const p = MODEL.products.find(x=>x.our_product===currentProduct());
+  const si = document.getElementById('selIndication');
+  si.innerHTML = (p?p.indications:[]).map(v=>
+    `<option value="${esc(v.indication)}">${esc(v.indication)}</option>`).join('');
+}
+function onProductChange(){ populateIndications(); render(); }
+
+// ---- sorting ----
+const PHASE_RANK={EARLY_PHASE1:1,PHASE1:2,'PHASE1/PHASE2':3,PHASE2:4,
+  'PHASE2/PHASE3':5,PHASE3:7,PHASE4:8};
+function topPhase(phases){if(!phases||!phases.length)return'—';return phases.reduce((a,b)=>(PHASE_RANK[a]||0)>(PHASE_RANK[b]||0)?a:b);}
+function phaseRank(phases){ return Math.max(0,...(phases||[]).map(p=>PHASE_RANK[p]||0)); }
+function sortComps(comps){
+  const mode=document.getElementById('selSort').value;
+  const ourProduct=currentProduct();
+  const a=[...comps];
+  a.sort((x,y)=>{
+    // ★我方产品始终排第一
+    const xOur=x.competitor&&x.competitor.includes(ourProduct);
+    const yOur=y.competitor&&y.competitor.includes(ourProduct);
+    if(xOur&&!yOur) return -1;
+    if(!xOur&&yOur) return 1;
+    if(mode==='threat') return y.quad_y-x.quad_y;
+    else if(mode==='phase') return phaseRank(y.phases)-phaseRank(x.phases);
+    else if(mode==='readout'){
+      const rx=x.next_readout||'9999', ry=y.next_readout||'9999';
+      return rx<ry?-1:rx>ry?1:0;}
+    else if(mode==='efficacy') return (y.key_efficacy?1:0)-(x.key_efficacy?1:0)||y.quad_y-x.quad_y;
+    return 0;
+  });
+  return a;
+}
+
+// ---- main render ----
+function render(){
+  destroyCharts();
+  const v=getView();
+  const app=document.getElementById('app');
+  if(!v){ app.innerHTML='<div class="panel">无数据</div>'; return; }
+  const c=v.counts;
+  app.innerHTML = `
+    ${overviewCards(v,c)}
+    ${changeAlertsHtml(v.change_alerts)}
+    <div class="panel collapsible" id="pq">
+      <h2 onclick="toggle('pq')">🎯 竞争格局四象限图
+        <span class="tag">X=研发进度 · Y=综合威胁/疗效 · 气泡=试验数 · ★=我方（同公式动态计算）</span>
+        <span class="chev">▾</span></h2>
+      <div class="body">
+        <div class="chartbox"><canvas id="quadChart"></canvas></div>
+        <div class="legend" style="margin-top:8px;padding:8px 0">
+          <span><span class="dot" style="background:var(--t1)"></span>Tier1高威胁</span>
+          <span><span class="dot" style="background:var(--t2)"></span>Tier2中高</span>
+          <span><span class="dot" style="background:var(--t3)"></span>Tier3中</span>
+          <span><span class="dot" style="background:var(--t4)"></span>Tier4低</span>
+          <span><span class="dot" style="background:var(--new)"></span>🆕新发现</span>
+          <span style="margin-left:8px">| 象限虚线: X=4(中期) Y=威胁4.5 | ★ 五角星=我方产品</span>
+        </div>
+      </div>
+    </div>
+    ${scenarioComparatorsHtml(v)}
+    ${trendsHtml(v.trends)}
+    ${ownershipRegistryHtml(v)}
+    <div class="panel">
+      <h2>📋 竞品详细格局表 <span class="tag">点击任一行展开该竞品的每个临床试验</span></h2>
+      <div class="disclaim">⚠️ 跨试验疗效为间接比较，人群/设计不同，不可直接下结论（悬停疗效看人群备注）。
+        疗效空缺分三级标注：有试验无数据→📝数据待发表 / 无试验→— / 其余→🔍待检索。依赖证据地图管线/手录(Excel③)。
+        大学、医院或研究者可作为试验申办方，但不因此成为产品原研方或权利方。</div>
+      <div id="tableWrap"></div>
+    </div>
+  `;
+  drawQuadrant(v);
+  drawTrends(v.trends);
+  drawTable(v);
+}
+
+function confidenceBadge(level){
+  const l=(level||'low').toLowerCase();
+  const text=l==='high'?'高置信':l==='medium'?'中置信':'低置信·待校审';
+  const cls=l==='high'?'b-pub':l==='medium'?'b-fuzzy':'b-new';
+  return `<span class="badge ${cls}">${text}</span>`;
+}
+function ownershipSourceLinks(source){
+  const links=(source||'').split('|').map(s=>s.trim()).filter(Boolean);
+  return links.map((u,i)=>`<a href="${esc(u)}" target="_blank">来源${i+1} ↗</a>`).join(' · ') || '—';
+}
+function ownershipRegistryHtml(v){
+  const own=v.our_product_ownership||{};
+  const assets=[{
+    competitor:v.our_product,
+    originator:own.originator,
+    current_rights_holders:own.current_rights_holders,
+    rights_scope:own.rights_scope,
+    ownership_basis:own.ownership_basis,
+    ownership_source:own.ownership_source,
+    ownership_confidence:own.ownership_confidence,
+    is_our_product:true
+  },...(v.competitors||[])];
+  const rows=assets.map(c=>`<tr${c.is_our_product?' style="background:#e8f0fe"':''}>
+    <td><b>${esc(c.competitor)}</b>${c.is_our_product?' <span class="badge b-cde">我方</span>':''}</td>
+    <td>${esc(c.originator||'待校审')}</td>
+    <td>${esc(c.current_rights_holders||c.company||'待校审')}</td>
+    <td class="small">${esc(c.rights_scope||'未核实')}</td>
+    <td>${confidenceBadge(c.ownership_confidence)}</td>
+    <td class="small">${esc(c.ownership_basis||'待补充')}</td>
+    <td class="small">${ownershipSourceLinks(c.ownership_source)}</td>
+  </tr>`).join('');
+  return `<div class="panel collapsible" id="por">
+    <h2 onclick="toggle('por')">🏭 资产原研/权利方追溯
+      <span class="tag">与ClinicalTrials.gov试验申办方分开</span><span class="chev">▾</span></h2>
+    <div class="body"><div class="disclaim">这里回答“产品归谁开发、谁持有当前区域权利”；展开下方竞品行后另看每项试验的Lead Sponsor。真实生产工厂/受托生产商需用药品注册或生产许可资料另行核实。</div>
+    <table><thead><tr><th>资产</th><th>原研方</th><th>当前权利方</th><th>区域范围</th><th>置信度</th><th>归属依据</th><th>来源</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="7" class="muted small">尚无资产归属记录。</td></tr>'}</tbody></table></div></div>`;
+}
+
+function overviewCards(v,c){
+  const om=v.our_metrics||{};
+  return `<div class="cards">
+    <div class="card"><div class="n">${esc(v.our_product)}</div>
+      <div class="l">我方产品 · ${esc(v.line||'')} · ${esc(om.effective_phase||v.our_phase||'')}</div></div>
+    <div class="card"><div class="n">${Number(om.competitive_score||0).toFixed(1)}</div>
+      <div class="l">我方进展分 · ${esc(om.effective_status||'UNKNOWN')} · ${esc(om.score_source||'')}</div></div>
+    <div class="card"><div class="n">${c.competitors}</div><div class="l">同机制核心竞品</div></div>
+    <div class="card"><div class="n">${(v.scenario_competitors||[]).length}</div><div class="l">治疗场景竞品/基准</div></div>
+    <div class="card"><div class="n" style="color:var(--new)">${c.new_entrants}</div>
+      <div class="l">🆕 名单外新发现</div></div>
+    <div class="card"><div class="n">${c.watchlist}</div><div class="l">📌 盯防名单内</div></div>
+    <div class="card"><div class="n" style="color:var(--ok)">${c.published}</div>
+      <div class="l">已发表(数据落地)</div></div>
+  </div>`;
+}
+
+function scenarioComparatorsHtml(v){
+  const rows=(v.scenario_competitors||[]).map(x=>`<tr>
+    <td><b>${esc(x.competitor)}</b></td><td>${esc(x.company||'—')}</td>
+    <td><span class="badge b-fuzzy">${esc(x.competitor_type||'场景竞品')}</span></td>
+    <td>${esc(x.mechanism||'—')}</td><td>${esc(x.stage||'—')}</td>
+    <td class="small">${esc(x.role||'—')}</td>
+    <td>${guidelineStatusBadge(x.guideline_status)}<br>
+      <span class="muted small">${esc(x.medical_review_status||'待医学审核')}</span></td>
+    <td class="small">${esc(x.guideline_scope||'待医学信息知识库补充')}</td>
+    <td class="small">
+      ${x.source_url?`<a href="${esc(x.source_url)}" target="_blank">临床依据 ↗</a>`:'—'}
+      ${x.guideline_source_url?` · <a href="${esc(x.guideline_source_url)}" target="_blank">指南/监管 ↗</a>`:''}
+      <br><span class="muted">${esc(x.as_of_date||'')} · ${esc(x.knowledge_owner||'')}</span></td>
+  </tr>`).join('');
+  return `<div class="panel collapsible" id="psc">
+    <h2 onclick="toggle('psc')">🧭 同治疗场景竞品与标准基准
+      <span class="tag">不计入同机制资产数，也不进入四象限</span><span class="chev">▾</span></h2>
+    <div class="body"><div class="disclaim"><b>定义：</b>同治疗场景竞品，是指在相同疾病分期、分子分型、治疗线和既往治疗条件下，临床决策中具有可替代性或争夺同一患者池的标准治疗、指南可选方案及关键在研方案；不能仅凭机制相似或在注册试验中共现而纳入。<br>
+      <b>生产口径：</b>本模块应来自由医学信息维护的内部知识库，至少记录国家/地区、指南版本、适用人群、推荐等级、审核人和审核日期。当前MVP仅完成公开指南/监管资料核对，全部记录仍标记“待医学信息知识库确认”。</div>
+    <table><thead><tr><th>产品/方案</th><th>公司</th><th>类别</th><th>机制</th><th>阶段/地位</th><th>竞争角色</th><th>指南/医学状态</th><th>适用范围</th><th>来源</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="9" class="muted small">当前场景尚未配置扩展竞品。</td></tr>'}</tbody></table></div></div>`;
+}
+function guidelineStatusBadge(status){
+  const s=status||'待医学审核';
+  const cls=s.includes('推荐')||s.includes('标准')?'b-pub':s.includes('可选')?'b-fuzzy':'b-new';
+  return `<span class="badge ${cls}">${esc(s)}</span>`;
+}
+
+function changeAlertsHtml(ca){
+  if(!ca || !ca.has_baseline){
+    return `<div class="panel"><h2 style="cursor:default">🔔 变更告警</h2>
+      <div class="muted small">基线已建立——下次刷新起将显示"相比上次的变化"。</div></div>`;
+  }
+  const rows=[];
+  (ca.added||[]).forEach(a=>rows.push(`<div class="alert add">🆕 ${esc(a.competitor)}：${esc(a.detail)}</div>`));
+  (ca.changed||[]).forEach(a=>rows.push(`<div class="alert chg">🔄 ${esc(a.competitor)} ${esc(a.nct_id||'')}：${esc(a.field)} ${esc(a.from)} → ${esc(a.to)}</div>`));
+  (ca.earlier_readout||[]).forEach(a=>rows.push(`<div class="alert early">⏰ ${esc(a.competitor)} ${esc(a.nct_id||'')}：${esc(a.detail)}</div>`));
+  const body = rows.length?`<div class="alert-list">${rows.join('')}</div>`
+    :`<div class="muted small">自上次快照以来无变化。</div>`;
+  return `<div class="panel collapsible" id="pa">
+    <h2 onclick="toggle('pa')">🔔 变更告警 <span class="tag">相比上次刷新 (${esc(ca.prior_ts||'')})</span>
+      <span class="chev">▾</span></h2><div class="body">${body}</div></div>`;
+}
+
+function trendsHtml(tr){
+  if(!tr || !tr.enough){
+    return `<div class="panel"><h2 style="cursor:default">📈 趋势图</h2>
+      <div class="muted small">${esc(tr?tr.note:'趋势数据积累中(需 ≥2 次刷新)')}
+       （当前快照数：${tr?tr.snapshot_count:0}）</div></div>`;
+  }
+  return `<div class="panel collapsible" id="pt">
+    <h2 onclick="toggle('pt')">📈 趋势图 <span class="tag">基于 ${tr.snapshot_count} 次快照 · 赛道加热/降温 + 竞品阶段推进</span>
+      <span class="chev">▾</span></h2>
+    <div class="body"><div class="grid2">
+      <div class="chartbox sm"><canvas id="trendMetrics"></canvas></div>
+      <div class="chartbox sm"><canvas id="trendTraj"></canvas></div>
+    </div></div></div>`;
+}
+
+// ---- quadrant chart ----
+const TIER_COLOR=s=>s>=7?'#e74c3c':s>=4.5?'#e67e22':s>=2.5?'#f1c40f':'#2ecc71';
+
+// --- ★ Our-product star data (closure, available before chart creation) ---
+let _ourStarData = null;
+
+// ★ Plugin: draw our-product star + quadrant lines after chart renders
+const ourProductPlugin = {
+  id: 'ourProductOverlay',
+  afterDraw(chart) {
+    // Read from _ourStarData (set before chart creation) or chart instance (fallback)
+    const v = _ourStarData || chart._ourProductData;
+    if (!v) return;
+    const {x, y, label, ourY} = v;
+    const ctx = chart.ctx, xa = chart.scales.x, ya = chart.scales.y;
+    if (!ctx || !xa || !ya) return;
+    const px = xa.getPixelForValue(x), py = ya.getPixelForValue(y);
+    if (!isFinite(px) || !isFinite(py)) return;
+    
+    // ★ Star — draw an actual star shape (5-pointed)
+    ctx.save();
+    const starSize = 30;
+    const spikes = 5; const outerR = starSize / 2; const innerR = outerR * 0.45;
+    ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const r = i % 2 === 0 ? outerR : innerR;
+      const angle = (Math.PI * i) / spikes - Math.PI / 2;
+      const sx = px + r * Math.cos(angle);
+      const sy = py + r * Math.sin(angle);
+      i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+    }
+    ctx.closePath();
+    ctx.fillStyle = '#0033A0';
+    ctx.fill();
+    ctx.strokeStyle = '#001a52';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+    
+    // Label below star
+    ctx.save();
+    ctx.font = 'bold 12px "Microsoft YaHei",sans-serif';
+    ctx.fillStyle = '#0033A0';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('我方 ' + label.split('(')[0].trim() + ' · ' + Number(v.y).toFixed(1), px, py + starSize * 0.55);
+    ctx.restore();
+    
+    // Quadrant divider lines
+    const midX = xa.getPixelForValue(4), midY = ya.getPixelForValue(4.5);
+    const left = xa.getPixelForValue(-0.5), right = xa.getPixelForValue(9.5);
+    const top = ya.getPixelForValue(11), bottom = ya.getPixelForValue(-0.5);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(107,114,128,0.25)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke();
+    // Quadrant labels (clamp to visible area)
+    ctx.font = '11px "Microsoft YaHei",sans-serif';
+    ctx.fillStyle = 'rgba(107,114,128,0.5)';
+    ctx.textAlign = 'right'; ctx.fillText('领先威胁', right - 10, top + 16);
+    ctx.textAlign = 'left'; ctx.fillText('高潜早期', left + 10, top + 16);
+    ctx.textAlign = 'right'; ctx.fillText('后期平庸', right - 10, bottom - 6);
+    ctx.textAlign = 'left'; ctx.fillText('早期观察', left + 10, bottom - 6);
+    ctx.restore();
+  }
+};
+
+Chart.register(ourProductPlugin);
+function drawQuadrant(v){
+  const ctx=document.getElementById('quadChart'); if(!ctx) return;
+  // Filter our product from competitor bubbles (dynamic by our_product name)
+  const ourCore=v.our_product.split('(')[0].trim().toLowerCase();
+  const pts=v.competitors.filter(c=>c.trial_count>0&&!c.competitor.toLowerCase().includes(ourCore)).map(c=>({
+    x:c.quad_x, y:c.quad_y, r:Math.min(18,4+(c.trial_count||1)*1.3),
+    label:c.competitor, new:c.new_entrant, quad:c.quadrant
+  }));
+  const ds=[{
+    label:'核心直接竞品 (同机制)', data:pts,
+    backgroundColor:pts.map(p=>p.new?'rgba(198,120,221,.6)':hexA(TIER_COLOR(p.y),.5)),
+    borderColor:pts.map(p=>p.new?'#c678dd':TIER_COLOR(p.y)), borderWidth:1.5
+  }];
+  // ★ 我方产品 position (computed before chart creation so plugin can access)
+  const om=v.our_metrics||{};
+  const ourX=Number.isFinite(Number(om.progress_score))?Number(om.progress_score):phaseRank([v.our_phase]);
+  const ourY=Number.isFinite(Number(om.competitive_score))?Number(om.competitive_score):0;
+  // Set star data BEFORE chart creation — plugin's afterDraw will read _ourStarData
+  _ourStarData = {x: ourX, y: ourY, label: v.our_product,
+    quad:om.quadrant||'', status:om.effective_status||'UNKNOWN'};
+  // ★ Bubble dataset for tooltip + click interaction (keep it small, no redundant pointStyle)
+  ds.push({label:'★ 我方 '+v.our_product, data:[{x:ourX,y:ourY,r:6}],
+    backgroundColor:'transparent', borderColor:'transparent', borderWidth:0});
+  const ch=new Chart(ctx,{type:'bubble',data:{datasets:ds},options:{
+    responsive:true,maintainAspectRatio:false,
+    onClick:(e,els)=>{ if(els.length){const d=els[0];
+      const p=ds[d.datasetIndex].data[d.index]; if(p&&p.label) highlightRow(p.label);}},
+    plugins:{
+      legend:{display:true,position:'bottom',labels:{color:'#374151',font:{size:12},padding:16,usePointStyle:true,pointStyleWidth:10}},
+      tooltip:{callbacks:{label:c=>{const p=c.raw;
+        return `${p.label} | ${p.quad||''} | 威胁${p.y} 进度${p.x}`;}}}
+    },
+    scales:{
+      x:{min:-0.5,max:9.5,title:{display:true,text:'研发进度 →',color:'#6b7280',font:{size:13}},
+        grid:{color:'#e5e7eb'},ticks:{color:'#6b7280',stepSize:1}},
+      y:{min:-0.5,max:11,title:{display:true,text:'威胁/疗效强度 →',color:'#6b7280',font:{size:13}},
+        grid:{color:'#e5e7eb'},ticks:{color:'#6b7280',stepSize:1}}
+    }
+  }});
+  _charts.push(ch);
+  // Also store on chart instance as fallback
+  ch._ourProductData = _ourStarData;
+}
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);
+  return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+
+
+// ---- trend charts ----
+function drawTrends(tr){
+  if(!tr||!tr.enough) return;
+  const m=document.getElementById('trendMetrics');
+  if(m){ const ch=new Chart(m,{type:'line',data:{labels:tr.labels.map(shortTs),
+    datasets:[
+      mk('试验总数',tr.series.trials_total,'#4a9eff'),
+      mk('玩家数',tr.series.players,'#c678dd'),
+      mk('后期试验',tr.series.late_phase,'#e67e22'),
+      mk('已发表',tr.series.published_total,'#2ecc71'),
+    ]},options:lineOpts('赛道指标趋势')}); _charts.push(ch); }
+  const t=document.getElementById('trendTraj');
+  if(t){ const colors=['#4a9eff','#e74c3c','#2ecc71','#f1c40f','#c678dd','#e67e22'];
+    const ds=tr.trajectories.slice(0,6).map((tj,i)=>({
+      label:tj.competitor, borderColor:colors[i%6], backgroundColor:colors[i%6],
+      data:tj.points.map(p=>p.rank), tension:.2, spanGaps:true}));
+    const ch=new Chart(t,{type:'line',
+      data:{labels:tr.labels.map(shortTs),datasets:ds},
+      options:lineOpts('竞品阶段推进轨迹 (Y=阶段秩)')}); _charts.push(ch); }
+}
+function mk(label,data,color){return {label,data,borderColor:color,
+  backgroundColor:color,tension:.2,fill:false};}
+function shortTs(t){return (t||'').replace(/T.*/,'').replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3');}
+function lineOpts(title){return {responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#1a1a2e',boxWidth:12,font:{size:11}}},
+    title:{display:true,text:title,color:'#374151',font:{size:12}}},
+  scales:{x:{grid:{color:'#e5e7eb'},ticks:{color:'#6b7280',font:{size:10}}},
+    y:{grid:{color:'#e5e7eb'},ticks:{color:'#6b7280'},beginAtZero:true}}};}
+
+// ---- detailed table ----
+function drawTable(v){
+  const om=v.our_metrics||{};
+  const own=v.our_product_ownership||{};
+  const ownRow={
+    competitor:v.our_product, company:own.current_rights_holders,
+    originator:own.originator, current_rights_holders:own.current_rights_holders,
+    ownership_confidence:own.ownership_confidence, trials:om.trials||[],
+    phases:[om.effective_phase||v.our_phase].filter(Boolean),
+    trial_count:om.trial_count||0, quad_x:om.progress_score||0,
+    quad_y:om.competitive_score||0, quadrant:om.quadrant||'',
+    next_readout:om.next_readout, key_efficacy:null, cde:[],
+    published_any:(om.trials||[]).some(t=>t.published), pubmed_links:[],
+    is_our_product:true
+  };
+  const comps=[ownRow,...sortComps(v.competitors)];
+  const rows=comps.map((c,i)=>compRow(c,i)).join('');
+  document.getElementById('tableWrap').innerHTML=`
+    <table><thead><tr>
+      <th>竞品</th><th>资产原研/当前权利方</th><th>最高阶段</th><th>试验数</th>
+      <th>综合威胁</th><th>预计读出</th><th>关键疗效(间接比较)</th>
+      <th>中国CDE/NMPA</th><th>象限</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+function tierPill(y){const c=TIER_COLOR(y);
+  const lab=y>=7?'Tier1':y>=4.5?'Tier2':y>=2.5?'Tier3':'Tier4';
+  return `<span class="pill" style="background:${c}">${lab} ${y}</span>`;}
+function compRow(c,i){
+  const isOur=!!c.is_our_product;
+  const eff=c.key_efficacy
+    ? `<span title="${esc(c.key_efficacy.population_note||'')}">${esc(c.key_efficacy.text)}</span>
+       <span class="badge b-fuzzy">间接</span>
+       ${c.key_efficacy.pmid ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${esc(c.key_efficacy.pmid)}" target="_blank" class="small">PMID</a>` : ''}`
+    : c.trial_count>0
+      ? `<span class="muted small">📝 数据待发表</span>`
+      : c.trial_count===0
+        ? `<span class="muted small">—</span>`
+        : `<span class="muted small">🔍 待检索</span>`;
+  const cde=(c.cde&&c.cde.length)
+    ? c.cde.map(x=>`<span class="badge b-cde">${esc(x.cde_stage)}</span>`).join(' ')
+    : `<span class="muted small">—</span>`;
+  const pubLink=c.pubmed_links&&c.pubmed_links.length
+    ?` <a href="${esc(c.pubmed_links[0].url)}" target="_blank" class="small" title="${esc(c.pubmed_links[0].title||'')}">PMID ${esc(c.pubmed_links[0].pmid)}</a>`:'';
+  const badges=(c.new_entrant?`<span class="badge b-new">🆕新发现</span>`:'')
+    +(c.published_any?`<span class="badge b-pub">📄已发表</span>${pubLink}`:'');
+  const readout=c.next_readout?esc(c.next_readout):'<span class="muted small">—</span>';
+  const owner=`<b>${esc(c.current_rights_holders||c.company||'待校审')}</b><br>
+    <span class="muted">原研：${esc(c.originator||'待校审')}</span><br>${confidenceBadge(c.ownership_confidence)}`;
+  return `<tr class="crow" id="row-${i}" onclick="toggleDetail(${i})"${isOur?' style="background:#e8f0fe"':''}>
+    <td><b>${esc(c.competitor)}</b>${badges}</td>
+    <td class="small">${owner}</td>
+    <td>${esc(topPhase(c.phases)||'—')}</td>
+    <td>${c.trial_count}</td>
+    <td>${tierPill(c.quad_y)}</td>
+    <td class="small">${readout}</td>
+    <td class="small">${eff}</td>
+    <td>${cde}</td>
+    <td class="small">${isOur?'★ 我方':esc(c.quadrant||'—')}</td>
+  </tr>
+  <tr id="det-${i}" style="display:none${isOur?';background:#e8f0fe':''}"><td colspan="9">${detailHtml(c)}</td></tr>`;
+}
+function detailHtml(c){
+  const tr=(c.trials||[]).map(t=>{
+    const pub=t.published
+      ?(t.pub_match_type==='exact'
+        ?`<span class="badge b-pub">📄已发表</span>`
+        :`<span class="badge b-fuzzy">疑似(待确认)</span>`):'';
+    const pubLinks=(t.publications||[]).map(p=>
+      `<a href="${esc(p.url)}" target="_blank">PMID ${esc(p.pmid)}</a>`).join(' · ');
+    const readout=t.readout_actual
+      ?`${esc(t.readout_actual)} <span class="muted">(${esc(t.readout_basis||'实证')})</span>`
+      :(t.estimated_readout?`${esc(t.estimated_readout)} <span class="muted">(估算)</span>`:'—');
+    const sponsor=t.lead_sponsor||'—';
+    const academic=isAcademicSponsor(sponsor);
+    return `<tr>
+      <td><a href="${esc(t.url)}" target="_blank">${esc(t.nct_id)}</a> ${pub}</td>
+      <td class="small">${esc(t.title||'')}</td>
+      <td class="small">${esc(sponsor)} ${academic?'<span class="badge b-fuzzy">学术申办</span>':''}</td>
+      <td class="small">${esc(c.current_rights_holders||c.company||'待校审')}</td>
+      <td>${esc(t.phase||'—')}</td>
+      <td class="small">${esc(t.status||'—')}</td>
+      <td>${esc(t.enrollment||'—')}</td>
+      <td class="small">${esc(t.start_date||'')}~${esc(t.completion_date||'')}</td>
+      <td class="small">${readout}</td>
+      <td class="small">${pubLinks||'<span class="muted">—</span>'}</td>
+    </tr>`;}).join('');
+  const evRows=(c.evidence||[]).map(e=>`<tr>
+      <td>${esc(e.endpoint)}</td><td>${esc(e.value)}${esc(e.unit)}</td>
+      <td class="small">${esc(e.comparator||'—')}</td><td>${esc(e.n||'—')}</td>
+      <td class="small">${esc(e.readout_date||'')}</td>
+      <td class="small">${esc(e.source||'')}</td>
+      <td class="small muted">${esc(e.population_note||'')}</td></tr>`).join('');
+  const evBlock=evRows?`<h4 class="small muted" style="margin:10px 0 4px">疗效明细(间接比较，注意人群差异)</h4>
+    <table><thead><tr><th>终点</th><th>数值</th><th>对照</th><th>N</th>
+      <th>读出</th><th>来源</th><th>人群备注</th></tr></thead><tbody>${evRows}</tbody></table>`
+    :`<div class="muted small" style="margin-top:8px">${c.trial_count>0?'📝 数据待发表':c.trial_count===0?'—':'🔍 待检索'}（依赖Excel③/证据地图管线）。</div>`;
+  return `<div class="detail">
+    <div class="disclaim"><b>资产归属：</b>原研方 ${esc(c.originator||'待校审')}；当前权利方 ${esc(c.current_rights_holders||c.company||'待校审')}；
+      区域 ${esc(c.rights_scope||'未核实')}。${confidenceBadge(c.ownership_confidence)}
+      ${ownershipSourceLinks(c.ownership_source)}<br><span class="muted">${esc(c.ownership_basis||'')}</span></div>
+    <h4 class="small muted" style="margin-bottom:4px">临床试验明细 (${(c.trials||[]).length})</h4>
+    <table><thead><tr><th>NCT</th><th>标题</th><th>试验申办方</th><th>资产原研/权利方</th><th>阶段</th><th>状态</th>
+      <th>入组</th><th>起止</th><th>读出</th><th>文献</th></tr></thead>
+      <tbody>${tr||'<tr><td colspan="10" class="muted small">无 CT.gov 试验(仅名单/CDE 来源)</td></tr>'}</tbody></table>
+    ${evBlock}
+  </div>`;
+}
+function isAcademicSponsor(name){
+  const n=(name||'').toLowerCase();
+  return ['university','college','hospital','institute','center','clinic','大学','学院','医院','研究所','中心']
+    .some(k=>n.includes(k));
+}
+function toggleDetail(i){
+  const d=document.getElementById('det-'+i);
+  if(d) d.style.display = d.style.display==='none'?'table-row':'none';
+}
+function highlightRow(label){
+  const v=getView(); const comps=sortComps(v.competitors);
+  const idx=comps.findIndex(c=>c.competitor===label);
+  if(idx<0) return;
+  const row=document.getElementById('row-'+idx);
+  if(row){ row.scrollIntoView({behavior:'smooth',block:'center'});
+    row.style.transition='background .3s'; row.querySelectorAll('td').forEach(td=>td.style.background='#dbeafe');
+    setTimeout(()=>row.querySelectorAll('td').forEach(td=>td.style.background=''),1200);
+    toggleDetail(idx);
+  }
+}
+function toggle(id){ document.getElementById(id).classList.toggle('collapsed'); }
+
+// boot
+initSelectors();
+render();
+
+</script>
+<div style="text-align:center;padding:12px;color:var(--muted);font-size:11px;border-top:1px solid var(--line);margin-top:24px">
+  数据截止: 2026-07-15T15:36:00+00:00 · CT.gov 23 trials · PubMed 0 条证据 · 覆盖 4 适应症 · 竞品圈定: 同靶点×同适应症
+</div>
+</body>
+</html>
