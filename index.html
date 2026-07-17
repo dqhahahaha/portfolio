@@ -501,56 +501,30 @@
       所有 Demo 基于公开数据构建，数据来源可溯源。不包含任何企业内部信息。
     </p>
 
-    <!-- Demo 1: JS207 product competitive landscape -->
+    <!-- Demo 1: CI Dashboard SHR-A1811 -->
     <div class="demo-block">
       <div class="demo-header">
-        <h3>📊 药物在研图景：JS207 × NSCLC 产品竞争 Dashboard</h3>
+        <h3>📊 SHR-A1811（HER2 ADC）竞争格局 Dashboard</h3>
         <span class="demo-tag interactive">交互式</span>
       </div>
       <div class="demo-row">
         <div class="demo-preview">
-          <iframe src="demos/js207.html" loading="lazy" sandbox="allow-scripts allow-same-origin" title="JS207 NSCLC 产品竞争 Dashboard"></iframe>
+          <iframe src="demos/ci-dashboard.html" loading="lazy" sandbox="allow-scripts allow-same-origin" title="SHR-A1811 Dashboard"></iframe>
         </div>
         <div class="demo-info">
-          <h4>以我方产品为锚点，按真实治疗场景比较竞争</h4>
-          <p>围绕君实生物 JS207，在四个 NSCLC 研发场景中同时展示同机制直接竞品、医生可能选择的治疗方案、我方研发进展、资产权利方、分地区监管状态和单项试验证据；关键判断均提供可验证链接。</p>
+          <h4>锚点：恒瑞 HER2 ADC · 竞品全景</h4>
+          <p>整合 ClinicalTrials.gov、PubMed、中国 CDE 公开数据，六步自动化流水线生成交互式竞争格局分析。</p>
           <div class="stat-row">
-            <div class="stat-badge"><div class="val">4</div><div class="lbl">NSCLC场景</div></div>
-            <div class="stat-badge"><div class="val">4</div><div class="lbl">直接竞品资产</div></div>
-            <div class="stat-badge"><div class="val">12</div><div class="lbl">场景方案/基准</div></div>
-            <div class="stat-badge"><div class="val">4</div><div class="lbl">我方场景试验</div></div>
-            <div class="stat-badge"><div class="val">5</div><div class="lbl">监管状态资产</div></div>
+            <div class="stat-badge"><div class="val">731</div><div class="lbl">CT.gov 试验</div></div>
+            <div class="stat-badge"><div class="val">7</div><div class="lbl">适应症分层</div></div>
+            <div class="stat-badge"><div class="val">30</div><div class="lbl">证据条目</div></div>
+            <div class="stat-badge"><div class="val">6步</div><div class="lbl">自动化流水线</div></div>
           </div>
           <div class="tag-row">
-            <span>搜全与别名扩展</span><span>产品身份解析</span><span>治疗场景切分</span>
-            <span>动态研发评分</span><span>厂家与申办方分离</span><span>地区化监管状态</span>
-            <span>一手核验链接</span><span>证据可追溯</span>
+            <span>CT.gov API v2</span><span>PubMed E-utilities</span><span>CDE联网检索</span>
+            <span>四象限分析</span><span>适应症隔离</span><span>Canvas可视化</span>
           </div>
-          <a href="demos/js207.html" class="btn btn-primary" target="_blank">🔗 打开完整 Dashboard</a>
-        </div>
-      </div>
-
-      <div class="methodology">
-        <h4>方法论：先保证搜全与身份正确，再做竞争判断</h4>
-        <p>Dashboard 不是简单汇总试验数量，而是从疾病领域逐层下钻到靶点、资产、适应症项目和单项试验；所有归并与结论保留来源，低置信度内容进入人工校审。</p>
-        <div class="flow-row" aria-label="药物在研图景处理流程">
-          <div class="flow-step">宽范围检索</div><div class="flow-arrow">→</div>
-          <div class="flow-step">试验去重</div><div class="flow-arrow">→</div>
-          <div class="flow-step">产品身份解析</div><div class="flow-arrow">→</div>
-          <div class="flow-step">场景切分</div><div class="flow-arrow">→</div>
-          <div class="flow-step">监管状态核验</div><div class="flow-arrow">→</div>
-          <div class="flow-step">同口径评分</div><div class="flow-arrow">→</div>
-          <div class="flow-step">证据与人工校审</div>
-        </div>
-        <div class="method-grid">
-          <img src="assets/dashboard-architecture.png" alt="疾病领域、靶点、产品、研发项目与临床试验之间的 Dashboard 架构">
-          <div class="method-list">
-            <div class="method-item"><strong>1. 搜全与去重</strong><span>疾病、靶点、MOA、研发代码和公司历史名称多轮扩展；原始记录不删除，归并需可解释，撤销/拆分列为生产化闸门。</span></div>
-            <div class="method-item"><strong>2. 五层产品身份</strong><span>区分活性分子、研发资产、具体制剂/构型、适应症项目和试验，避免把盐型、前药、ADC构型或联合方案误当同一产品。</span></div>
-            <div class="method-item"><strong>3. 可比较的研发评分</strong><span>我方与竞品都按场景内最高有效阶段和当前状态计算；星形位置随 JS207 自身试验进展动态更新，不代表临床疗效优劣。</span></div>
-            <div class="method-item"><strong>4. 地区化监管状态</strong><span>分别记录上市批准、申请审评、IND/CTA许可和特殊资格，并按国家/地区、适应症、剂型及日期限定；每项状态附一手核验链接。</span></div>
-            <div class="method-item"><strong>5. 证据与责任边界</strong><span>试验申办方与资产厂家分别追溯；监管与指南生产口径由注册/医学信息知识库维护。身份质量闸门未通过时，统计标记为待校审。</span></div>
-          </div>
+          <a href="demos/ci-dashboard.html" class="btn btn-primary" target="_blank">🔗 打开完整 Demo</a>
         </div>
       </div>
     </div>
@@ -640,6 +614,33 @@
           <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">
             <strong>方法论：</strong>形成"情报采集 → 策略设计 → 内容产出 → 效果复盘"完整闭环，可迁移至任何治疗领域的医学内容运营。
           </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Framework reuse: HRS-4642 -->
+    <div class="demo-block">
+      <div class="demo-header">
+        <h3>🔁 框架复用：HRS-4642（KRAS G12D）竞品发现</h3>
+        <span class="demo-tag case">案例</span>
+      </div>
+      <div class="demo-row">
+        <div class="demo-preview">
+          <div class="placeholder">
+            <span class="big">🔁</span>
+            <strong>同一套流水线，换 4 个 CSV，2 分钟生成新 Dashboard</strong><br>
+            14 个 KRAS G12D 竞品 · 3 适应症 · 252 trials<br>
+            <a href="demos/hrs-4642.html" style="color:var(--link);font-weight:600;margin-top:8px;display:inline-block;">→ 查看 HRS-4642 案例</a>
+          </div>
+        </div>
+        <div class="demo-info">
+          <h4>参数化设计：换靶点即用</h4>
+          <p>将 SHR-A1811（HER2 ADC）的 6 步流水线直接复用于 HRS-4642（KRAS G12D），仅需替换产品 CSV 和检索关键词。14 个同靶点竞品全景扫描，含 Zoldonrasib（Phase 3, ORR 52%）、Setidegrasib（Phase 3）等关键竞品疗效对比。</p>
+          <div class="tag-row">
+            <span>参数化设计</span><span>框架复用</span><span>KRAS G12D</span>
+            <span>14竞品</span><span>Phase 3对比</span><span>CT.gov三路搜索</span>
+          </div>
+          <a href="demos/hrs-4642.html" class="btn btn-outline" target="_blank">📄 查看 HRS-4642 案例</a>
         </div>
       </div>
     </div>
